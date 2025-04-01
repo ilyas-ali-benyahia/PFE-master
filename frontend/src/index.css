@@ -1,0 +1,384 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+/* General container styling */
+.chatbot-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 700px;
+}
+
+.chatbot-header {
+  background: #3498db;
+  color: white;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatbot-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.reset-button {
+  background: #e74c3c;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.reset-button:hover {
+  background: #c0392b;
+}
+
+/* Document info panel */
+.document-info-panel {
+  background: #e8f4fc;
+  padding: 10px 16px;
+  border-bottom: 1px solid #cce5ff;
+}
+
+.document-info-panel h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: #2c3e50;
+}
+
+.current-document {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+}
+
+.document-name {
+  font-weight: bold;
+  color: #2980b9;
+}
+
+.document-timestamp {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+/* Upload section */
+.upload-section {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.upload-section h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.file-input {
+  padding: 12px;
+  border: 2px dashed #bdc3c7;
+  border-radius: 6px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.upload-button {
+  background: #2ecc71;
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-button:hover:not(:disabled) {
+  background: #27ae60;
+}
+
+.upload-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  color: #3498db;
+  font-weight: bold;
+}
+
+/* Upload history section */
+.upload-history {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.upload-history h4 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+}
+
+.document-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.document-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.switch-document-button {
+  background: #3498db;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.switch-document-button:hover {
+  background: #2980b9;
+}
+
+/* Chat messages section */
+.messages-container {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.message {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 1rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: #3498db;
+  color: white;
+  border-bottom-right-radius: 0;
+}
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+
+.bot-message {
+  align-self: flex-start;
+  background: #e9e9e9;
+  color: #333;
+  border-bottom-left-radius: 0;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background: #777;
+  border-radius: 50%;
+  animation: typing 1s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+/* Chat input form */
+.input-form {
+  display: flex;
+  padding: 16px;
+  border-top: 1px solid #e1e1e1;
+  gap: 8px;
+}
+
+.message-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.send-button {
+  background: #3498db;
+  border: none;
+  color: white;
+  padding: 0 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.send-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+/* Mermaid CSS */
+.mermaid {
+  font-family: 'trebuchet ms', verdana, arial, sans-serif;
+  font-size: 16px;
+  fill: #333;
+}
+
+.mermaid .label {
+  color: #333;
+}
+
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon,
+.mermaid .node path {
+  fill: #fff;
+  stroke: #333;
+  stroke-width: 1px;
+}
+
+.mermaid .edgePath .path {
+  stroke: #333;
+  stroke-width: 1.5px;
+}
+
+.mermaid .arrowheadPath {
+  fill: #333;
+}
+
+.mermaid .cluster rect {
+  fill: #f0f0f0;
+  stroke: #333;
+  stroke-width: 1px;
+}
+
+.mermaid .cluster text {
+  fill: #333;
+}
+
+.mermaid .actor {
+  stroke: #333;
+  fill: #fff;
+}
+
+.mermaid text.actor {
+  fill: #333;
+  stroke: none;
+}
+
+.mermaid .actor-line {
+  stroke: #333;
+}
+
+.mermaid .messageLine0 {
+  stroke-width: 1.5px;
+  stroke-dasharray: 2 2;
+  stroke: #333;
+}
+
+.mermaid .messageLine1 {
+  stroke-width: 1.5px;
+  stroke-dasharray: 2 2;
+  stroke: #333;
+}
+
+.mermaid .labelBox {
+  stroke: #333;
+  fill: #fff;
+}
+
+.mermaid .labelText {
+  fill: #333;
+  stroke: none;
+}
+
+.mermaid .loopText {
+  fill: #333;
+  stroke: none;
+}
+
+.mermaid .loopLine {
+  stroke-width: 2px;
+  stroke-dasharray:2
+}
