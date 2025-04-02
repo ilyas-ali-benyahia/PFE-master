@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   Box,
   Heading,
@@ -10,12 +10,12 @@ import {
   Text,
   useToast,
   Icon,
-  Divider,
   Badge,
   Spinner,
-  Tooltip
+  Tooltip,
+  IconButton
 } from '@chakra-ui/react';
-import { FaPaperPlane, FaRobot, FaUser } from 'react-icons/fa';
+import { FaPaperPlane, FaRobot, FaUser, FaEye, FaEyeSlash, FaExpand, FaCompress } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
 import * as api from '../services/api';
 
@@ -26,6 +26,11 @@ const ChatSection = () => {
   const chatContainerRef = useRef(null);
   const inputRef = useRef(null);
   const toast = useToast();
+  
+  // New state variables
+  const [showContent, setShowContent] = useState(true);
+  const [expandedChat, setExpandedChat] = useState(false);
+  const [chatHeight, setChatHeight] = useState('300px');
 
   const handleChatSubmit = async () => {
     if (!userMessage.trim()) return;
@@ -56,6 +61,16 @@ const ChatSection = () => {
     }
   };
 
+  const toggleChatExpansion = () => {
+    setExpandedChat(!expandedChat);
+    setChatHeight(expandedChat ? '300px' : '500px');
+  };
+
+  // Simple toggle for content visibility
+  const toggleContentVisibility = () => {
+    setShowContent(!showContent);
+  };
+
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -77,41 +92,68 @@ const ChatSection = () => {
 
   return (
     <Box borderRadius="xl" p={6} mt={6} bg="white" boxShadow="lg">
-      <Heading size="lg" mb={6} color="gray.800">
-        Chat with the AI about your content
-      </Heading>
+      <Flex justify="space-between" align="center" mb={6}>
+        <Heading size="lg" color="gray.800">
+          Chat with the AI about your content
+        </Heading>
+        <Flex gap={2}>
+          <Tooltip label={showContent ? "Hide content" : "Show content"}>
+            <Button 
+              size="sm" 
+              colorScheme="purple"
+              variant="outline" 
+              leftIcon={showContent ? <FaEyeSlash /> : <FaEye />}
+              onClick={toggleContentVisibility}
+            >
+              {showContent ? "Hide Content" : "Show Content"}
+            </Button>
+          </Tooltip>
+          <Tooltip label={expandedChat ? "Compress chat" : "Expand chat"}>
+            <IconButton
+              size="sm"
+              colorScheme="purple"
+              variant="outline"
+              icon={expandedChat ? <FaCompress /> : <FaExpand />}
+              onClick={toggleChatExpansion}
+              aria-label={expandedChat ? "Compress chat" : "Expand chat"}
+            />
+          </Tooltip>
+        </Flex>
+      </Flex>
       
       <Flex direction={{ base: 'column', md: 'row' }} gap={4}>
-        {/* Extracted Text Panel */}
-        <Box flex={1} bg="gray.50" borderRadius="md" p={4}>
-          <Flex align="center" mb={3}>
-            <Badge colorScheme="blue" mr={2}>Source</Badge>
-            <Text fontWeight="bold">Extracted Text</Text>
-          </Flex>
-          
-          <Box 
-            maxH="300px" 
-            overflowY="auto" 
-            p={3} 
-            borderRadius="md" 
-            borderWidth="1px" 
-            borderColor="gray.200"
-            bg="white"
-          >
-            {generatedText ? (
-              <Text>{generatedText}</Text>
-            ) : (
-              <Text color="gray.500" fontStyle="italic">No text extracted yet</Text>
-            )}
+        {/* Extracted Text Panel - Only shown when showContent is true */}
+        {showContent && (
+          <Box flex={1} bg="gray.50" borderRadius="md" p={4} mb={{ base: 4, md: 0 }}>
+            <Flex align="center" mb={3}>
+              <Badge colorScheme="blue" mr={2}>Source</Badge>
+              <Text fontWeight="bold">Extracted Text</Text>
+            </Flex>
+            
+            <Box 
+              maxH="300px" 
+              overflowY="auto" 
+              p={3} 
+              borderRadius="md" 
+              borderWidth="1px" 
+              borderColor="gray.200"
+              bg="white"
+            >
+              {generatedText ? (
+                <Text whiteSpace="pre-wrap">{generatedText}</Text>
+              ) : (
+                <Text color="gray.500" fontStyle="italic">No text extracted yet</Text>
+              )}
+            </Box>
           </Box>
-        </Box>
+        )}
 
         {/* Chat Panel */}
-        <Box flex={1}>
+        <Box flex={1} w="100%">
           {/* Chat Messages */}
           <Box 
             ref={chatContainerRef} 
-            h="300px" 
+            h={chatHeight}
             overflowY="auto" 
             mb={4} 
             p={4} 
@@ -119,6 +161,7 @@ const ChatSection = () => {
             borderRadius="md"
             borderWidth="1px" 
             borderColor="gray.200"
+            transition="height 0.3s ease"
           >
             {chatMessages.length === 0 ? (
               <Flex direction="column" justify="center" align="center" h="100%" opacity={0.7}>
@@ -150,10 +193,12 @@ const ChatSection = () => {
                     borderWidth="1px"
                     borderColor={message.role === 'user' ? 'purple.200' : 'gray.200'}
                   >
-                    <Text fontSize="sm" color="gray.500" mb={1}>
-                      {message.role === 'user' ? 'You' : 'AI'} • {formatTimestamp()}
-                    </Text>
-                    <Text>{message.content}</Text>
+                    <Flex justify="space-between" align="center" mb={1}>
+                      <Text fontSize="sm" fontWeight="medium" color="gray.500">
+                        {message.role === 'user' ? 'You' : 'AI'} • {formatTimestamp()}
+                      </Text>
+                    </Flex>
+                    <Text whiteSpace="pre-wrap">{message.content}</Text>
                   </Box>
                 </Flex>
               ))
