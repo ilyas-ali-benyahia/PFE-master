@@ -1,19 +1,19 @@
 // services/api.js
 import axios from 'axios';
+import { API_URL } from '../config';
 
-const API_BASE_URL = '/agent';
 
 export const uploadFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  const response = await axios.post(`${API_BASE_URL}/upload/`, formData, {
+  const response = await axios.post(`${API_URL}/agent/upload/`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 };
 
 export const uploadYoutubeUrl = async (url) => {
-  const response = await axios.post(`${API_BASE_URL}/upload/`, {
+  const response = await axios.post(`${API_URL}/agent/upload/`, {
     youtube_url: url,
   }, {
     headers: { 'Content-Type': 'application/json' },
@@ -22,11 +22,11 @@ export const uploadYoutubeUrl = async (url) => {
 };
 
 export const generateStudyContent = async (endpoint, text) => {
-  const response = await axios.post(`${API_BASE_URL}/${endpoint}/`, { text });
+  const response = await axios.post(`${API_URL}/agent/${endpoint}/`, { text });
   return response.data;
 };
 
 export const sendChatMessage = async (message) => {
-  const response = await axios.post(`${API_BASE_URL}/chat/`, { message });
+  const response = await axios.post(`${API_URL}/agent/chat/`, { message });
   return response.data;
 };
