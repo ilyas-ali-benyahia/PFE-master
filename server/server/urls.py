@@ -10,7 +10,7 @@ urlpatterns = [
     path('agent/', include('summraiz_agent.urls')),
     path('agent/', include('file_processing.urls')),
     path('agent/', include('chatbot_app.urls')),
-    path('', include('authentication.urls')),
+    
 
 
 ]
