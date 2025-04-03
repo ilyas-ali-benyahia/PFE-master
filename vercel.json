@@ -2,7 +2,10 @@
   "buildCommand": "cd frontend && npm install && CI=false npm run build",
   "outputDirectory": "frontend/build",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/api/:path*", "destination": "/api/index.py" },
     { "source": "/(.*)", "destination": "/frontend/$1" }
-  ]
+  ],
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "server.settings"
+  }
 }

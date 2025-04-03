@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-3nrhf3jl9rmvpxyw=ok7kxcjvuhw42xyr*b++efy-r#1^9ds+i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+
 
 
 # Application definition
@@ -83,12 +83,7 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+
 
 
 # Password validation
@@ -137,7 +132,7 @@ CORS_ALLOWED_ORIGINS = [
 
 
 # Update allowed hosts
-ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+
 
 # Configure CORS
 CORS_ALLOW_ALL_ORIGINS = True  # In production, specify exact origins
@@ -146,3 +141,22 @@ CORS_ALLOW_CREDENTIALS = True
 # Configure static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Add Vercel URL to allowed hosts
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1', '*']
+
+# Configure CORS to allow your frontend domain
+
+
+# Configure database for serverless environment
+# SQLite won't work well in production on Vercel, consider PostgreSQL or another database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+# For production, use an environment variable for a proper database:
+# import dj_database_url
+# DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
