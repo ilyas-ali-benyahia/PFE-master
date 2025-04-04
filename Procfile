@@ -1,1 +1,1 @@
-web: cd backend && gunicorn PFE-MASTER.wsgi --log-file -
+web: cd backend && gunicorn --bind 0.0.0.0:$PORT backend.wsgi:application
