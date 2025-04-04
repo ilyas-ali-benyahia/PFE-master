@@ -59,12 +59,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'server.urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'staticfiles')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,10 +76,16 @@ TEMPLATES = [
         },
     },
 ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'staticfiles'),
+]
 
-WSGI_APPLICATION = 'server.wsgi.application'
-
-
+WSGI_APPLICATION = 'backend.wsgi.application'
+from django.views.generic import TemplateView
+urlpatterns = [
+    # Your existing URL patterns...
+    os.path('', TemplateView.as_view(template_name='index.html')),
+]
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -120,7 +126,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -130,6 +136,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
+PORT = os.environ.get('PORT', 8000)
 
 # Update allowed hosts
 
@@ -143,12 +150,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Add Vercel URL to allowed hosts
-ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1', '*']
-
+ALLOWED_HOSTS = ['*'] 
 # Configure CORS to allow your frontend domain
 
 
-# Configure database for serverless environment
+# Configure database for backendless environment
 # SQLite won't work well in production on Vercel, consider PostgreSQL or another database
 DATABASES = {
     'default': {
