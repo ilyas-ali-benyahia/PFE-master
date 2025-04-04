@@ -14,8 +14,8 @@ import tempfile
 import magic
 
 # Initialize Supabase client
-supabase_url = os.environ.get("SUPABASE_URL")
-supabase_key = os.environ.get("SUPABASE_KEY") 
+supabase_url = os.environ.get("SUPABASE_URL1")
+supabase_key = os.environ.get("SUPABASE_KEY1") 
 supabase_bucket = os.environ.get("SUPABASE_BUCKET", "files")
 supabase: Client = create_client(supabase_url, supabase_key)
 
