@@ -1,11 +1,10 @@
 {
-    "build": {
-      "builder": "NIXPACKS",
-      "buildCommand": "./build.sh"
-    },
-    "deploy": {
-      "startCommand": "cd backend && python manage.py migrate && gunicorn PFE-MASTER.wsgi",
-      "restartPolicyType": "ON_FAILURE",
-      "restartPolicyMaxRetries": 10
-    }
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfile": "Dockerfile"
+  },
+  "deploy": {
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
   }
+}
