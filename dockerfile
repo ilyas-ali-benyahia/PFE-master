@@ -31,4 +31,4 @@ EXPOSE $PORT
 
 # Command to run the application
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "your_project.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
