@@ -197,3 +197,9 @@ def upload_and_extract(request):
     
     # ❌ If neither YouTube URL nor file is provided
     return Response({"error": "No file or YouTube URL provided"}, status=400)
+@api_view(["GET"])
+def health_check(request):
+    """
+    Simple health check endpoint that returns 200 OK
+    """
+    return Response({"status": "ok"})

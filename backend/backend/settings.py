@@ -28,6 +28,14 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # Static files configuration
 STATIC_URL = '/static/'
+
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+os.makedirs(STATIC_DIR, exist_ok=True)
+
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
@@ -163,3 +171,11 @@ PORT = int(os.environ.get('PORT', 8000))
 # File upload settings
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
+
+
+# Make sure these settings are also defined properly
+
+
