@@ -30,4 +30,5 @@ RUN python manage.py collectstatic --noinput
 EXPOSE $PORT
 
 # Command to run the application
-CMD python manage.py migrate && gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "your_project.wsgi:application"]
