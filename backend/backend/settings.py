@@ -20,19 +20,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3nrhf3jl9rmvpxyw=ok7kxcjvuhw42xyr*b++efy-r#1^9ds+i'
+# In production, use environment variable
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-3nrhf3jl9rmvpxyw=ok7kxcjvuhw42xyr*b++efy-r#1^9ds+i')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+# Static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# WhiteNoise configuration for static files
 WHITENOISE_USE_FINDERS = True
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-
 # Application definition
-
-INSTALLED_APPS = [
+INSTALLED_APPS = [ 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,24 +46,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "rest_framework",
-    "flashcards_agent",
-    "quizes_agent",
-    "diagram_agent",
-    "summraiz_agent",
-    "file_processing",
-    "chatbot_app",
-    
+    'rest_framework',
+    'corsheaders',  # Added corsheaders
+    'flashcards_agent',
+    'quizes_agent',
+    'diagram_agent',
+    'summraiz_agent',
+    'file_processing',
+    'chatbot_app',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise should be early
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS should be before CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware'
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -80,26 +85,29 @@ TEMPLATES = [
         },
     },
 ]
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'staticfiles'),
-]
-
 
 WSGI_APPLICATION = 'backend.wsgi.application'
-from django.views.generic import TemplateView
-urlpatterns = [
-    # Your existing URL patterns...
-    os.path('', TemplateView.as_view(template_name='index.html')),
-]
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
-
+# Database configuration
+# SQLite for development, PostgreSQL for production
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+else:
+    # Use PostgreSQL in production (Railway provides DATABASE_URL)
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600
+        )
+    }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -115,59 +123,43 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = '/static/'
-
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS configuration
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://your-railway-frontend-app.railway.app",
+    # Add your production frontend URL here
 ]
 
-PORT = os.environ.get('PORT', 8000)
+# Allow all hosts in development, specific hosts in production
+ALLOWED_HOSTS = ['*'] if DEBUG else [
+    '.railway.app',  # Allow all Railway subdomains
+    'localhost',
+    '127.0.0.1',
+    # Add any other production domains
+]
 
-# Update allowed hosts
+# For better security in production
+if not DEBUG:
+    # HTTPS settings
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
+# Get the port from Railway
+PORT = int(os.environ.get('PORT', 8000))
 
-# Configure CORS
-CORS_ALLOW_ALL_ORIGINS = True  # In production, specify exact origins
-CORS_ALLOW_CREDENTIALS = True
-
-# Configure static files
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Add Vercel URL to allowed hosts
-ALLOWED_HOSTS = ['*'] 
-# Configure CORS to allow your frontend domain
-
-
-# Configure database for backendless environment
-# SQLite won't work well in production on Vercel, consider PostgreSQL or another database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-# For production, use an environment variable for a proper database:
-# import dj_database_url
-# DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
+# File upload settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

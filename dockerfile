@@ -1,43 +1,33 @@
-FROM python:3.9
+# Use Python 3.10 slim image
+FROM python:3.10-slim
 
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set work directory
 WORKDIR /app
 
-# Install Node.js and npm
-RUN apt-get update && apt-get install -y \
-    nodejs \
-    npm \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python requirements first
-COPY server/requirements.txt /app/server/
-RUN pip install -r server/requirements.txt
+# Install Python dependencies
+COPY ./backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy frontend package files and install dependencies
-COPY frontend/package*.json /app/frontend/
-WORKDIR /app/frontend
-RUN npm install
+# Copy project
+COPY ./backend /app/
 
-# Copy the rest of the application
-WORKDIR /app
-COPY . /app/
+# Create directory for static files
+RUN mkdir -p /app/staticfiles /app/media
 
-# Build frontend
-WORKDIR /app/frontend
-RUN npm run build
+# Collect static files
+RUN python manage.py collectstatic --noinput
 
-# Create static directory and copy frontend build
-RUN mkdir -p /app/server/staticfiles/ && \
-    cp -r /app/frontend/build/* /app/server/staticfiles/
+# Expose port
+EXPOSE $PORT
 
-# Setup backend
-WORKDIR /app/server
-RUN python manage.py collectstatic --noinput || echo "Collectstatic failed, continuing anyway"
-
-# Set the working directory to the server folder
-WORKDIR /app/server
-
-# Expose the port
-EXPOSE 8000
-
-# Run migrations and start the application
-CMD python manage.py migrate && gunicorn your_project.wsgi:application
+# Command to run the application
+CMD python manage.py migrate && gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT

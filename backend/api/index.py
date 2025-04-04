@@ -3,7 +3,7 @@ from django.core.wsgi import get_wsgi_application
 import os
 
 # Set Django settings environment variable
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
 # Initialize Django WSGI application
 application = get_wsgi_application()
