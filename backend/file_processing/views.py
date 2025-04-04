@@ -1,13 +1,23 @@
 import os
 import re
-from django.core.files.storage import default_storage
+import uuid
+import base64
+from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from langchain.document_loaders import PyPDFLoader
-from .utils import docx_to_text, pptx_to_text,image_to_text,txt_to_text
+from .utils import docx_to_text, pptx_to_text, image_to_text, txt_to_text
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
+from supabase import create_client, Client
+import tempfile
+import magic
 
+# Initialize Supabase client
+supabase_url = os.environ.get("SUPABASE_URL")
+supabase_key = os.environ.get("SUPABASE_KEY") 
+supabase_bucket = os.environ.get("SUPABASE_BUCKET", "files")
+supabase: Client = create_client(supabase_url, supabase_key)
 
 @api_view(["POST"])
 def upload_and_extract(request):
@@ -73,7 +83,6 @@ def upload_and_extract(request):
             text = " ".join([item["text"] for item in transcript])
             
             return Response({
-                
                 "extracted_text": text
             })
         except TranscriptsDisabled:
@@ -101,35 +110,61 @@ def upload_and_extract(request):
     # 📂 Process file if provided
     if file:
         try:
-            # Save the uploaded file
-            file_name = default_storage.save(f"uploads/{file.name}", file)
-            file_path = os.path.join(default_storage.location, file_name)
-            
-            # Determine the file extension
+            # Generate a unique filename to avoid collisions
+            unique_filename = f"{uuid.uuid4()}-{file.name}"
             file_ext = file.name.split(".")[-1].lower()
+            
+            # Create a temporary file to process locally
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_ext}") as temp_file:
+                for chunk in file.chunks():
+                    temp_file.write(chunk)
+                temp_file_path = temp_file.name
+            
+            # Get file mimetype
+            mime_type = magic.Magic(mime=True).from_file(temp_file_path)
+            
+            # Upload file to Supabase
+            with open(temp_file_path, 'rb') as f:
+                file_content = f.read()
+                
+            # Upload to supabase storage
+            supabase_response = supabase.storage.from_(supabase_bucket).upload(
+                unique_filename,
+                file_content,
+                {"content-type": mime_type}
+            )
+            
+            # Get public URL (optional, depending on your bucket settings)
+            file_url = supabase.storage.from_(supabase_bucket).get_public_url(unique_filename)
+            
             extracted_text = ""
             
             # Process the file based on its extension
             if file_ext == "pdf":
-                loader = PyPDFLoader(file_path)
+                loader = PyPDFLoader(temp_file_path)
                 docs = loader.load()
                 extracted_text = "\n".join([doc.page_content for doc in docs])
             elif file_ext == "docx":
-                extracted_text = docx_to_text(file_path)
+                extracted_text = docx_to_text(temp_file_path)
             elif file_ext == "pptx":
-                extracted_text = pptx_to_text(file_path)
+                extracted_text = pptx_to_text(temp_file_path)
             elif file_ext in ["jpg", "jpeg", "png", "bmp", "tiff", "gif"]:
-                extracted_text = image_to_text(file_path)
+                extracted_text = image_to_text(temp_file_path)
             elif file_ext == "txt":
-                extracted_text = txt_to_text(file_path)
+                extracted_text = txt_to_text(temp_file_path)
             else:
+                # Clean up the temporary file
+                os.unlink(temp_file_path)
                 return Response(
                     {
                         "error": f"Unsupported file format: .{file_ext}",
-                        "supported_formats": ["pdf", "docx", "pptx"],
+                        "supported_formats": ["pdf", "docx", "pptx", "jpg", "jpeg", "png", "txt"],
                     },
                     status=400,
                 )
+            
+            # Clean up the temporary file
+            os.unlink(temp_file_path)
             
             # Check if text extraction was successful
             if not extracted_text.strip():
@@ -140,14 +175,24 @@ def upload_and_extract(request):
                     status=500,
                 )
             
-            # Return success response with extracted text
+            # Return success response with extracted text and file info
             return Response(
                 {
-                    
                     "extracted_text": extracted_text,
+                    "file_info": {
+                        "filename": unique_filename,
+                        "storage_path": unique_filename,
+                        "file_url": file_url
+                    }
                 }
             )
         except Exception as e:
+            # Clean up the temporary file if it exists
+            if 'temp_file_path' in locals():
+                try:
+                    os.unlink(temp_file_path)
+                except:
+                    pass
             return Response({"error": f"Text extraction failed: {str(e)}"}, status=500)
     
     # ❌ If neither YouTube URL nor file is provided
