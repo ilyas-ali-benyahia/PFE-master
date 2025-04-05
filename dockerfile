@@ -31,4 +31,9 @@ EXPOSE $PORT
 
 # Command to run the application
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT backend.wsgi:application"]
+RUN echo "PORT is set to: $PORT" && \
+    echo "Checking if gunicorn is installed:" && \
+    pip show gunicorn && \
+    echo "Current directory:" && \
+    pwd && \
+    ls -la
