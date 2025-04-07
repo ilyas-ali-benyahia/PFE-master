@@ -1,519 +1,593 @@
-import { useState, useEffect } from "react";
+
+import React, { useState, useEffect } from 'react';
+import { AppProvider } from '../context/AppContext';
+import UploadSection from '../components/UploadSection';
+import StudyOptions from '../components/StudyOptions';
+import ResultsSection from '../components/ResultsSection';
 import {
   Box,
   Button,
   Container,
+  Flex,
   Heading,
-  Input,
+  Icon,
+  List,
+  ListItem,
   Text,
-  VStack,
-  Progress,
-  useToast,
-  IconButton,
   useColorModeValue,
-  RadioGroup,
-  Radio,
+  VStack,
   HStack,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-} from "@chakra-ui/react";
-import { FiUpload, FiDatabase } from "react-icons/fi";
-import { FaChevronLeft, FaChevronRight, FaRandom, FaPlus } from "react-icons/fa";
-import axios from "axios";
+  useDisclosure,
+  Collapse,
+  IconButton,
+  Divider,
+  Tooltip,
+  Badge,
+  SimpleGrid,
+  Image
+} from '@chakra-ui/react';
+import { 
+  Brain,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  History,
+  X,
+  File,
+  FileImage,
+  FileVideo,
+  FileAudio,
+  FileArchive,
+  Layout,
+  MessageSquare,
+  Share2,
+  ClipboardList
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const Flashcard = ({ question, answer, isFlipped, setIsFlipped }) => {
-  const bgColor = useColorModeValue("white", "gray.800");
-  
+const Header = ({ setActiveSection }) => {
   return (
-    <Box
-      minHeight="400px"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      my={6}
-    >
-      <Box
-        bg={bgColor}
-        borderRadius="lg"
-        boxShadow="xl"
-        p={8}
-        width="100%"
-        height="450px"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        position="relative"
-        cursor="pointer"
-        onClick={() => setIsFlipped(!isFlipped)}
-        style={{
-          perspective: '1000px',
-        }}
-      >
-        <Box
-          position="absolute"
-          width="100%"
-          height="100%"
-          borderRadius="20px"
-          boxShadow="lg"
-          p="6"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          fontWeight="bold"
-          style={{
-            transformStyle: 'preserve-3d',
-            transition: 'transform 0.8s',
-            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-          }}
-        >
-          <Box
-            position="absolute"
-            width="100%"
-            height="100%"
-            borderRadius="20px"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            bg="blue.500"
-            color="white"
-            style={{ backfaceVisibility: 'hidden' }}
-          >
-            <Text fontSize="lg" lineHeight="1.4">{question}</Text>
-          </Box>
-          <Box
-            position="absolute"
-            width="100%"
-            height="100%"
-            borderRadius="20px"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            bg="green.500"
-            color="white"
-            transform="rotateY(180deg)"
-            style={{ backfaceVisibility: 'hidden' }}
-          >
-            <Text fontSize="lg" lineHeight="1.4">{answer}</Text>
-          </Box>
-        </Box>
-      </Box>
+    <Box bg="white" py={4} borderBottom="1px" borderColor="gray.100">
+      <Container maxW="6xl">
+        <Flex justify="space-between" align="center">
+          <HStack spacing={2}>
+            <Icon as={Brain} color="purple.500" boxSize={8} />
+            <Text fontSize="2xl" fontWeight="bold" color="purple.500">
+              StudyVia
+            </Text>
+          </HStack>
+          <HStack spacing={8} display={{ base: 'none', md: 'flex' }}>
+          <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
+            <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>            
+            {/* <Button variant="ghost" onClick={() => setActiveSection('resources')}>Resources</Button> */}
+            <Button variant="ghost" onClick={() => setActiveSection('about')}>About</Button>
+          </HStack>
+          <HStack spacing={4}>
+            
+            <Link to="/"><Button colorScheme="purple">Logout</Button></Link>
+          </HStack>
+        </Flex>
+      </Container>
     </Box>
   );
 };
 
-const UploadAndExtract = () => {
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [flashcards, setFlashcards] = useState([]);
-  const [quizzes, setQuizzes] = useState([]);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [currentCard, setCurrentCard] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [loadingQuizzes, setLoadingQuizzes] = useState(false);
-  const [textInput, setTextInput] = useState("");
-  const BASE_URL = "http://127.0.0.1:8000/api";
+
+
+const Features = () => {
+  const features = [
+    {
+      icon: FileText,
+      title: "Smart Content Processing",
+      description: "Upload PDFs, images, audio, or videos—our AI analyzes and extracts key concepts instantly."
+    },
+    {
+      icon: Layout,
+      title: "Adaptive Flashcards",
+      description: "Convert your notes into dynamic, interactive flashcards customized to your learning style."
+    },
+    {
+      icon: Brain,
+      title: "AI-Powered Quizzes",
+      description: "Generate tailored quizzes that challenge and reinforce your understanding."
+    },
+    {
+      icon: MessageSquare,
+      title: "AI Chat Assistant",
+      description: "Engage in interactive Q&A sessions with your study materials for deeper comprehension."
+    },
+    {
+      icon: Share2,
+      title: "Mind Map Generation",
+      description: "Simplify complex topics with AI-generated mind maps that enhance retention and clarity."
+    },
+    {
+      icon: ClipboardList,
+      title: "Concise Summaries",
+      description: "Get AI-driven summaries that highlight key ideas for quick and effective revision."
+    }
+  ];
   
-  const toast = useToast();
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const textColor = useColorModeValue('gray.800', 'white');
-
-  // Fetch existing quizzes on component mount
-  useEffect(() => {
-    fetchQuizzes();
-  }, []);
-
-  const fetchQuizzes = async () => {
-    setLoadingQuizzes(true);
-    try {
-      const response = await axios.get(`${BASE_URL}/quizes/show/`);
-      if (response.status === 200) {
-        setQuizzes(response.data);
-      }
-    } catch (error) {
-      toast({
-        title: "Error fetching quizzes",
-        description: error.message,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoadingQuizzes(false);
-    }
-  };
-
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    setFile(selectedFile);
-  };
-  
-  const handleAnswerSelect = (answer) => {
-    setSelectedAnswer(answer);
-    setShowFeedback(true);
-  };
-
-  const handleNext = () => {
-    if (quizzes.length === 0) return;
-    setCurrentQuestion((prev) => (prev + 1) % quizzes.length);
-    setShowFeedback(false);
-    setSelectedAnswer(null);
-  };
-
-  const handlePrev = () => {
-    if (quizzes.length === 0) return;
-    setCurrentQuestion((prev) => (prev - 1 + quizzes.length) % quizzes.length);
-    setShowFeedback(false);
-    setSelectedAnswer(null);
-  };
-
-  const handleShuffle = () => {
-    if (quizzes.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * quizzes.length);
-    setCurrentQuestion(randomIndex);
-    setShowFeedback(false);
-    setSelectedAnswer(null);
-  };
-
-  const createQuizFromText = async () => {
-    if (!textInput.trim()) {
-      toast({ 
-        title: "Error", 
-        description: "Please enter some text", 
-        status: "error" 
-      });
-      return;
-    }
-
-    setLoadingQuizzes(true);
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/quizes/create/`,
-        { input_text: textInput }
-      );
-      
-      if (response.status === 201 || response.status === 200) {
-        setQuizzes(response.data);
-        toast({ 
-          title: "Success", 
-          description: "Quizzes generated successfully", 
-          status: "success" 
-        });
-        setTextInput("");
-      }
-    } catch (error) {
-      toast({
-        title: "Error creating quizzes",
-        description: error.message,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoadingQuizzes(false);
-    }
-  };
-
-
-
-
-
-
-
-
-
-  
-
-  const handleUpload = async () => {
-    if (!file) {
-      toast({ title: "Error", description: "Please select a file", status: "error" });
-      return;
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      // Upload file and extract text
-      const response = await axios.post(`${BASE_URL}/upload/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (progressEvent) => {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(percent);
-        },
-      });
-
-      // Generate flashcards
-      const flashcardResponse = await axios.post(`${BASE_URL}/cards/create/`, {
-        input_text: response.data.extracted_text,
-      });
-      setFlashcards(flashcardResponse.data);
-
-      // Generate quizzes
-      const quizResponse = await axios.post(`${BASE_URL}/quizes/create/`, {
-        input_text: response.data.extracted_text,
-      });
-      setQuizzes(quizResponse.data);
-      
-      toast({ 
-        title: "Success", 
-        description: "Content generated successfully", 
-        status: "success" 
-      });
-    } catch (error) {
-      toast({ 
-        title: "Error", 
-        description: error.message, 
-        status: "error" 
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handlePrevCard = () => {
-    if (flashcards.length === 0) return;
-    setIsFlipped(false);
-    setCurrentCard((prev) => (prev === 0 ? flashcards.length - 1 : prev - 1));
-  };
-
-  const handleNextCard = () => {
-    if (flashcards.length === 0) return;
-    setIsFlipped(false);
-    setCurrentCard((prev) => (prev === flashcards.length - 1 ? 0 : prev + 1));
-  };
-
-  const handleRandomCard = () => {
-    if (flashcards.length === 0) return;
-    setIsFlipped(false);
-    const randomIndex = Math.floor(Math.random() * flashcards.length);
-    setCurrentCard(randomIndex);
-  };
 
   return (
-    <Container maxW="container.md" py={8}>
-      <VStack spacing={6} align="stretch">
-        <Heading textAlign="center">Learning Assistant</Heading>
-        
-        <Tabs variant="soft-rounded" colorScheme="blue" isFitted>
-          <TabList>
-            <Tab>Document Upload</Tab>
-            <Tab>Quiz Generation</Tab>
-          </TabList>
-          
-          <TabPanels>
-            {/* Document Upload Tab */}
-            <TabPanel>
-              <Box
-                border="2px dashed"
-                borderColor="gray.300"
-                borderRadius="md"
-                p={6}
-                textAlign="center"
-                mb={4}
-              >
-                <Input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".pdf,.docx,.txt"
-                  display="none"
-                  id="file-upload"
-                />
-                <Button
-                  as="label"
-                  htmlFor="file-upload"
-                  leftIcon={<FiUpload />}
-                  colorScheme="blue"
-                  mb={2}
-                >
-                  Select Document
-                </Button>
-                <Text>{file ? file.name : "No file selected"}</Text>
-              </Box>
-              
-              <Button 
-                onClick={handleUpload} 
-                isLoading={uploading} 
-                loadingText="Uploading..."
-                colorScheme="blue"
-                isDisabled={!file}
-                width="full"
-              >
-                Generate Learning Content
-              </Button>
-              
-              {uploading && <Progress value={uploadProgress} size="sm" colorScheme="blue" />}
-            </TabPanel>
-            
-            {/* Quiz Generation Tab */}
-            <TabPanel>
-              <VStack spacing={4}>
-                <Heading size="md">Generate Quizzes from Text</Heading>
-                <Box width="full">
-                  <Input
-                    placeholder="Enter text to generate quizzes from..."
-                    value={textInput}
-                    onChange={(e) => setTextInput(e.target.value)}
-                    size="md"
-                    mb={3}
-                  />
-                  <Button
-                    leftIcon={<FaPlus />}
-                    colorScheme="blue"
-                    onClick={createQuizFromText}
-                    isLoading={loadingQuizzes}
-                    loadingText="Generating..."
-                    width="full"
-                  >
-                    Create Quizzes
-                  </Button>
-                </Box>
-                
-                <HStack width="full" mt={2}>
-                  <Button
-                    leftIcon={<FiDatabase />}
-                    colorScheme="green"
-                    onClick={fetchQuizzes}
-                    isLoading={loadingQuizzes}
-                    loadingText="Loading..."
-                    width="full"
-                  >
-                    Load Saved Quizzes
-                  </Button>
-                </HStack>
-              </VStack>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-
-        {/* Flashcards Section */}
-        {flashcards.length > 0 && (
-          <>
-            <Heading as="h2" size="lg" textAlign="center" mt={8} mb={4}>
-              Flashcards
-            </Heading>
-            <Flashcard 
-              question={flashcards[currentCard]?.question || ""}
-              answer={flashcards[currentCard]?.answer || ""}
-              isFlipped={isFlipped} 
-              setIsFlipped={setIsFlipped} 
-            />
-            
-            <Box display="flex" justifyContent="center" gap={4}>
-              <IconButton
-                icon={<FaChevronLeft />}
-                onClick={handlePrevCard}
-                aria-label="Previous card"
-              />
-              <IconButton
-                icon={<FaRandom />}
-                onClick={handleRandomCard}
-                aria-label="Random card"
-              />
-              <IconButton
-                icon={<FaChevronRight />}
-                onClick={handleNextCard}
-                aria-label="Next card"
-              />
-            </Box>
-            
-            <Text textAlign="center">
-              {flashcards.length > 0 ? `Card ${currentCard + 1} of ${flashcards.length}` : "No flashcards available"}
+    <Box py={20} bg="gray.50" id="features">
+      <Container maxW="6xl">
+        <VStack spacing={12}>
+          <Box textAlign="center">
+            <Text color="purple.500" fontWeight="semibold" mb={3}>
+              FEATURES
             </Text>
-          </>
-        )}
-        
-        {/* Quiz Section */}
-        {quizzes.length > 0 && (
-          <>
-            <Heading as="h2" size="lg" textAlign="center" mt={8} mb={4}>
-              Quiz
-            </Heading>
-            <Box 
-              width="full" 
-              mx="auto"
-              bg={bgColor}
-              borderRadius="lg"
-              boxShadow="xl"
-              p={6}
-            >
-              {quizzes[currentQuestion] ? (
-                <>
-                  <Text fontSize="xl" fontWeight="bold" mb={4} color={textColor}>
-                    {quizzes[currentQuestion].question}
-                  </Text>
-                  <RadioGroup 
-                    mt={4} 
-                    onChange={handleAnswerSelect} 
-                    value={selectedAnswer}
-                  >
-                    <VStack align="stretch" spacing={3}>
-                      {quizzes[currentQuestion].options?.map((option, index) => (
-                        <Box key={index}>
-                          <Radio value={option} colorScheme="teal">
-                            {option}
-                          </Radio>
-                        </Box>
-                      ))}
-                    </VStack>
-                  </RadioGroup>
+            <Heading mb={4}>Unlock the Power of AI Learning</Heading>
+            <Text color="gray.600" fontSize="lg" maxW="2xl">
+              Our AI-driven platform transforms any content into an engaging and interactive learning experience.
+            </Text>
+          </Box>
 
-                  {/* Feedback */}
-                  {showFeedback && (
-                    <Text 
-                      mt={4} 
-                      fontSize="lg" 
-                      fontWeight="bold" 
-                      color={selectedAnswer === quizzes[currentQuestion].correctAnswer ? "green.500" : "red.500"}
-                    >
-                      {selectedAnswer === quizzes[currentQuestion].correctAnswer 
-                        ? "Correct!" 
-                        : `Incorrect! The correct answer is ${quizzes[currentQuestion].correctAnswer}.`}
-                    </Text>
-                  )}
-                </>
-              ) : (
-                <Text>No quiz questions available</Text>
-              )}
-            </Box>
-
-            {/* Navigation and Shuffle Buttons */}
-            <HStack spacing={4} mt={4} justify="center">
-              <IconButton
-                icon={<FaChevronLeft />}
-                aria-label="Previous question"
-                onClick={handlePrev}
-                isDisabled={quizzes.length === 0}
-              />
-              <IconButton
-                icon={<FaRandom />}
-                aria-label="Shuffle questions"
-                onClick={handleShuffle}
-                isDisabled={quizzes.length === 0}
-              />
-              <Text>
-                {quizzes.length > 0 ? `${currentQuestion + 1} / ${quizzes.length}` : "No quizzes"}
-              </Text>
-              <IconButton
-                icon={<FaChevronRight />}
-                aria-label="Next question"
-                onClick={handleNext}
-                isDisabled={quizzes.length === 0}
-              />
-            </HStack>
-          </>
-        )}
-      </VStack>
-    </Container>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">
+            {features.map((feature, index) => (
+              <VStack
+                key={index}
+                align="start"
+                p={6}
+                bg="white"
+                rounded="xl"
+                shadow="md"
+                borderWidth="1px"
+                borderColor="gray.200"
+                _hover={{
+                  transform: "translateY(-4px)",
+                  shadow: "xl",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              >
+                <Flex
+                  w={12}
+                  h={12}
+                  align="center"
+                  justify="center"
+                  rounded="xl"
+                  bg="purple.100"
+                  color="purple.600"
+                  mb={4}
+                >
+                  <Icon as={feature.icon} size={24} />
+                </Flex>
+                <Text fontWeight="bold" fontSize="lg">
+                  {feature.title}
+                </Text>
+                <Text color="gray.600">{feature.description}</Text>
+              </VStack>
+            ))}
+          </SimpleGrid>
+        </VStack>
+      </Container>
+    </Box>
   );
 };
 
-export default UploadAndExtract;
+
+const About = () => {
+  const team = [
+    {
+      name: "Ilyas Ali benyahia ",
+      role: "Computer Student",
+      bio: "A university student at Hassiba Ben Boali University, Chlef, specializing in Computer Science."
+    },
+    {
+      name: "Nassima Bousahba",
+      role: "Computer Teacher",
+      bio: "A professor at Hassiba Ben Boali University, Chlef, specializing in Computer Science"
+    },
+    {
+      name: "Ayoub allai",
+      role: "Computer Student",
+      bio: "A university student at Hassiba Ben Boali University, Chlef, specializing in Computer Science."
+    }
+  ];
+
+  return (
+    <Box py={20} bg="white" id="about">
+      <Container maxW="6xl">
+        <VStack spacing={16}>
+          <VStack spacing={8} textAlign="center">
+            <Text color="purple.500" fontWeight="semibold">
+              ABOUT US
+            </Text>
+            <Heading>Our Mission</Heading>
+            <Text color="gray.600" fontSize="lg" maxW="3xl">
+              At StudyVia, we believe that education should be accessible, engaging, and effective for everyone. 
+              Our mission is to transform the way people learn by harnessing the power of artificial intelligence 
+              to create personalized learning experiences that adapt to individual needs and preferences.
+            </Text>
+          </VStack>
+
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={12} w="full" alignItems="center">
+            <Box>
+              <Heading size="lg" mb={6}>Our Story</Heading>
+              <Text color="gray.600" mb={4}>
+                our platform  was founded  by master's students and a research supervisor  who recognized the immense potential of artificial intelligence
+                in education.Driven by apassion for innovation, they set out to createa smarter, more efficient learning experience powered by AI
+              </Text>
+              <Text color="gray.600" mb={4}>
+                After months of research and development, we created a platform that can transform any content into 
+                interactive learning materials tailored to individual learning styles.
+              </Text>
+              <Text color="gray.600">
+                Today, StudyVia serves students, teachers, and any learners, helping them learn more 
+                effectively and efficiently through the power of AI.
+              </Text>
+            </Box>
+            <Image 
+              src={require("../assete/www.jpg")} 
+              alt="Team working" 
+              rounded="lg" 
+              shadow="lg" 
+            />
+          </SimpleGrid>
+
+          <VStack spacing={8} w="full">
+            <Heading>Leadership Team</Heading>
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} w="full">
+              {team.map((member, index) => (
+                <VStack
+                  key={index}
+                  p={6}
+                  bg="white"
+                  rounded="xl"
+                  shadow="md"
+                  borderWidth="1px"
+                  borderColor="gray.200"
+                  spacing={4}
+                  align="center"
+                >
+                  <Box 
+                    w={20} 
+                    h={20} 
+                    bg="purple.100" 
+                    rounded="full" 
+                    display="flex" 
+                    alignItems="center" 
+                    justifyContent="center"
+                  >
+                    <Text fontSize="2xl" color="purple.500">
+                      {member.name.split(' ').map(n => n[0]).join('')}
+                    </Text>
+                  </Box>
+                  <Text fontWeight="bold" fontSize="lg">
+                    {member.name}
+                  </Text>
+                  <Text color="purple.500" fontSize="sm" fontWeight="medium">
+                    {member.role}
+                  </Text>
+                  <Text color="gray.600" textAlign="center">
+                    {member.bio}
+                  </Text>
+                </VStack>
+              ))}
+            </SimpleGrid>
+          </VStack>
+        </VStack>
+      </Container>
+    </Box>
+  );
+};
+
+const Footer = () => {
+  return (
+    <Box bg="white" py={16}>
+      <Container maxW="6xl">
+        <Flex
+          direction={{ base: 'column', md: 'row' }}
+          justify="space-between"
+          align="center"
+          borderTopWidth={1}
+          borderColor="gray.200"
+          pt={8}
+        >
+          <Text color="gray.600">
+            © {new Date().getFullYear()} StudyVia. All rights reserved.
+          </Text>
+          <HStack spacing={4} mt={{ base: 4, md: 0 }}>
+            <Button variant="ghost" size="sm">Twitter</Button>
+            <Button variant="ghost" size="sm">LinkedIn</Button>
+            <Button variant="ghost" size="sm">Facebook</Button>
+          </HStack>
+        </Flex>
+      </Container>
+    </Box>
+  );
+};
+
+// Example files that won't persist in localStorage
+const exampleFiles = [
+  {
+    id: 'example1',
+    name: 'Biology-Chapter1.pdf',
+    type: 'pdf',
+    isExample: true,
+    content: 'This is an example PDF file about Biology Chapter 1'
+  },
+  {
+    id: 'example2',
+    name: 'Chemistry-Reactions.jpg',
+    type: 'image',
+    isExample: true,
+    content: 'This is an example image showing chemical reactions'
+  },
+  {
+    id: 'example3',
+    name: 'Physics-Lecture.mp4',
+    type: 'video',
+    isExample: true,
+    content: 'This is an example video lecture about Physics'
+  }
+];
+
+// Get files from localStorage or initialize with empty array
+const getStoredFiles = () => {
+  try {
+    const stored = localStorage.getItem('uploadedFiles');
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error reading from localStorage:', error);
+    return [];
+  }
+};
+
+const FileIcon = ({ type }) => {
+  const icons = {
+    'image': FileImage,
+    'video': FileVideo,
+    'audio': FileAudio,
+    'pdf': FileText,
+    'zip': FileArchive,
+    'default': File
+  };
+  
+  const IconComponent = icons[type] || icons['default'];
+  return <Icon as={IconComponent} />;
+};
+
+const FileHistorySidebar = ({ files, onSelectFile, onRemoveFile, isOpen, onToggle }) => {
+  return (
+    <Box 
+      position="absolute" 
+      left="0" 
+      top="20"
+      bottom="52"
+      w={isOpen ? "300px" : "60px"}
+      bg="white"
+      boxShadow="lg"
+      transition="all 0.3s ease"
+      zIndex="sticky"
+    >
+      <Flex direction="column" h="100%" borderRight="1px" borderColor="gray.200">
+        <Flex 
+          p={4} 
+          align="center" 
+          justify={isOpen ? "space-between" : "center"}
+          borderBottom="1px" 
+          borderColor="gray.200"
+          cursor="pointer"
+          onClick={onToggle}
+        >
+          {isOpen ? (
+            <>
+              <HStack>
+                <Icon as={History} color="purple.500" />
+                <Text fontWeight="bold">File History</Text>
+              </HStack>
+              <Icon as={ChevronDown} />
+            </>
+          ) : (
+            <Tooltip label="Show History" placement="right">
+              <Icon as={History} color="purple.500" />
+            </Tooltip>
+          )}
+        </Flex>
+        
+        <Collapse in={isOpen} animateOpacity>
+          <Box flex="1" overflowY="auto" p={2}>
+            {/* Example Files Section */}
+            <Box mb={4}>
+              <Text fontSize="xs" color="gray.500" mb={2} px={2}>
+                EXAMPLE FILES
+              </Text>
+              <List spacing={2}>
+                {exampleFiles.map((file) => (
+                  <ListItem key={file.id}>
+                    <Flex
+                      align="center"
+                      p={2}
+                      borderRadius="md"
+                      _hover={{ bg: 'purple.50' }}
+                      cursor="pointer"
+                      onClick={() => onSelectFile(file)}
+                    >
+                      <Box color="purple.500" mr={3}>
+                        <FileIcon type={file.type} />
+                      </Box>
+                      <Text flex="1" isTruncated fontSize="sm">
+                        {file.name}
+                      </Text>
+                      <Badge colorScheme="purple" fontSize="xs">Example</Badge>
+                    </Flex>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+
+            {/* User Files Section */}
+            <Divider my={2} />
+            <Box>
+              <Text fontSize="xs" color="gray.500" mb={2} px={2}>
+                YOUR FILES
+              </Text>
+              {files.length === 0 ? (
+                <Text fontSize="sm" color="gray.500" px={2} py={4}>
+                  No files uploaded yet
+                </Text>
+              ) : (
+                <List spacing={2}>
+                  {files.map((file, index) => (
+                    <ListItem key={index}>
+                      <Flex
+                        align="center"
+                        p={2}
+                        borderRadius="md"
+                        _hover={{ bg: 'purple.50' }}
+                        bg={file.isSelected ? 'purple.100' : 'transparent'}
+                        cursor="pointer"
+                        onClick={() => onSelectFile(file, index)}
+                      >
+                        <Box color="purple.500" mr={3}>
+                          <FileIcon type={file.type} />
+                        </Box>
+                        <Text 
+                          flex="1" 
+                          isTruncated 
+                          fontSize="sm"
+                          fontWeight={file.isSelected ? "bold" : "normal"}
+                        >
+                          {file.name}
+                        </Text>
+                        <IconButton
+                          icon={<X size={16} />}
+                          size="xs"
+                          variant="ghost"
+                          aria-label="Remove file"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveFile(index);
+                          }}
+                        />
+                      </Flex>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Box>
+          </Box>
+        </Collapse>
+        
+        {isOpen && (
+          <Box p={4} borderTop="1px" borderColor="gray.200">
+            <Text fontSize="xs" color="gray.500">
+              {files.length} {files.length === 1 ? 'file' : 'files'} stored
+            </Text>
+          </Box>
+        )}
+      </Flex>
+    </Box>
+  );
+};
+
+const App = () => {
+  const bgColor = useColorModeValue('purple.50', 'gray.900');
+  const [activeSection, setActiveSection] = useState('home');
+  const [uploadedFiles, setUploadedFiles] = useState(getStoredFiles());
+  const [selectedFile, setSelectedFile] = useState(null);
+  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
+
+  // Save to localStorage whenever uploadedFiles changes
+  useEffect(() => {
+    try {
+      // Only save files that aren't examples
+      const filesToStore = uploadedFiles.filter(file => !file.isExample);
+      localStorage.setItem('uploadedFiles', JSON.stringify(filesToStore));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  }, [uploadedFiles]);
+
+  const handleFileUpload = (file) => {
+    const newFile = { 
+      ...file, 
+      isSelected: true,
+      id: Date.now().toString() // Add unique ID
+    };
+    setUploadedFiles(prev => [
+      newFile,
+      ...prev.map(f => ({ ...f, isSelected: false }))
+    ]);
+    setSelectedFile(newFile);
+  };
+
+  const handleSelectFile = (file, index) => {
+    if (file.isExample) {
+      // Handle example file selection
+      setSelectedFile(file);
+    } else {
+      // Handle user file selection
+      setUploadedFiles(prev => 
+        prev.map((f, i) => ({ 
+          ...f, 
+          isSelected: i === index 
+        }))
+      );
+      setSelectedFile(file);
+    }
+  };
+
+  const handleRemoveFile = (index) => {
+    setUploadedFiles(prev => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      if (prev[index].isSelected) {
+        setSelectedFile(newFiles[0] || null);
+        if (newFiles[0]) {
+          newFiles[0].isSelected = true;
+        }
+      }
+      return newFiles;
+    });
+  };
+
+  const renderSection = () => {
+    switch(activeSection) {
+      case 'features':
+        return <Features />;
+      case 'about':
+        return <About />;
+      case 'home':
+      default:
+        return (
+          <AppProvider>
+            <Box w="100vw" minH="100vh" bg={bgColor} color="gray.800">
+              <FileHistorySidebar 
+               
+                files={uploadedFiles} 
+                onSelectFile={handleSelectFile}
+                onRemoveFile={handleRemoveFile}
+                isOpen={isOpen}
+                onToggle={onToggle}
+              />
+               
+              <Box 
+                ml={isOpen ? "300px" : "60px"} 
+                transition="all 0.3s ease"
+                p={4}
+              >
+                <Flex flex={1} justifyContent="center" alignItems="center" py={8}>
+                  <Container maxW="container.xl">
+                    <UploadSection onFileUpload={handleFileUpload} />
+                    <StudyOptions selectedFile={selectedFile} />
+                    <ResultsSection selectedFile={selectedFile} />
+                  </Container>
+                </Flex>
+              </Box>
+            </Box>
+          </AppProvider>
+        );
+    }
+  };
+
+  return (
+    <Box>
+       <Header  setActiveSection={setActiveSection} />
+      {renderSection()}
+      <Footer />
+    </Box>
+  );
+};
+
+export default App;

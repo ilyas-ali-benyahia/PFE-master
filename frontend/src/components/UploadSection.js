@@ -114,13 +114,14 @@ const UploadSection = () => {
 
   return (
     <Box w="100%" borderRadius="2xl" p={8} mb={8} bg="white" boxShadow="lg">
+      <Box justifyItems={'center'}>
       <Heading size="2xl" mb={6} lineHeight="shorter">
         Welcome  <chakra.span color="purple.500"> {state.username}</chakra.span>
       </Heading>
-      <Text fontSize="xl" color="gray.600" mb={8}>
+      <Text fontSize="xl" color="gray.700" mb={8}>
         Start learning effortlessly—upload your content and choose a study tool.
       </Text>
-
+      </Box>
       <Tabs isFitted variant="soft-rounded" colorScheme="purple" onChange={setActiveTab} index={activeTab}>
         <TabList bg="gray.100" p={2} borderRadius="lg">
           <Tab _selected={{ bg: 'purple.500', color: 'white' }} fontWeight="medium">
@@ -148,7 +149,7 @@ const UploadSection = () => {
             >
               <Icon as={MdOutlineDragIndicator} boxSize={10} color="purple.500" />
               <Text mt={4} color="purple.500" fontWeight="medium" fontSize="lg">
-                Drag & Drop or Click to Upload
+                 Click to Upload 
               </Text>
               <Text mt={2} color="gray.600" fontSize="sm">
                 Supported formats: PDF, DOCX, PPTX, TXT, JPG, PNG
@@ -201,7 +202,15 @@ const UploadSection = () => {
       {isProcessing && (
         <Box mt={6} w={{ base: "100%", md: "80%", lg: "70%" }} mx="auto">
           <Text mb={2} color="gray.600">Processing your content...</Text>
-          <Progress value={progressValue} size="sm" colorScheme="purple" borderRadius="full" hasStripe isAnimated />
+          <Progress
+                  value={progressValue}
+                  height="12px"
+                  colorScheme="purple"
+                  borderRadius="full"
+                  mb={4}
+                  hasStripe
+                  isAnimated
+                />
         </Box>
       )}
     </Box>

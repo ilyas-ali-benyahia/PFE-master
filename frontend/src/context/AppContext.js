@@ -4,7 +4,7 @@ import React, { createContext, useContext, useReducer } from 'react';
 const AppContext = createContext();
 
 const initialState = {
-  username: 'Ali Benyahia Ilyas',
+  username: 'Username',
   file: null,
   youtubeUrl: '',
   showStudyOptions: false,

@@ -5,19 +5,88 @@ import base64
 from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from langchain.document_loaders import PyPDFLoader
-from .utils import docx_to_text, pptx_to_text, image_to_text, txt_to_text
+from langchain.document_loaders import PyPDFLoader, UnstructuredFileLoader
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
+from youtube_transcript_api.formatters import TextFormatter
 from supabase import create_client, Client
 import tempfile
 import magic
+import pytesseract
+from PIL import Image
+import dotenv
 
 # Initialize Supabase client
-supabase_url = os.environ.get("SUPABASE_URL1")
-supabase_key = os.environ.get("SUPABASE_KEY1") 
-supabase_bucket = os.environ.get("SUPABASE_BUCKET", "files")
+supabase_url = os.getenv("SUPABASE_url")
+supabase_key = os.getenv("SUPABASE_key") 
+supabase_bucket = os.getenv("SUPABASE_BUCKET", "files")
+if not supabase_url or not supabase_key:
+    raise ValueError("Supabase credentials not found in environment variables")
+
 supabase: Client = create_client(supabase_url, supabase_key)
+
+def txt_to_text(txt_path):
+    """
+    Read text from a plain text file.
+    
+    Args:
+        txt_path (str): Path to the text file
+        
+    Returns:
+        str: Content of the text file
+    """
+    try:
+        with open(txt_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except UnicodeDecodeError:
+        # Try different encodings if UTF-8 fails
+        try:
+            with open(txt_path, 'r', encoding='latin-1') as file:
+                return file.read()
+        except Exception as e:
+            raise Exception(f"Failed to read text file: {str(e)}")
+    except Exception as e:
+        raise Exception(f"Failed to read text file: {str(e)}")
+
+# Function to extract text from images using OCR
+def image_to_text(image_path):
+    """
+    Extract text from an image using Tesseract OCR.
+    
+    Args:
+        image_path (str): Path to the image file
+        
+    Returns:
+        str: Extracted text from the image
+    """
+    try:
+        # Open the image using PIL
+        img = Image.open(image_path)
+        
+        # Use pytesseract to do OCR on the image
+        text = pytesseract.image_to_string(img)
+        
+        return text
+    except Exception as e:
+        raise Exception(f"OCR processing failed: {str(e)}")
+   
+def pptx_to_text(pptx_path):
+    """Extract text from PowerPoint files"""
+    # Using UnstructuredFileLoader
+    loader = UnstructuredFileLoader(pptx_path)
+    documents = loader.load()
+    text = "\n\n".join([doc.page_content for doc in documents])
+    
+    return text
+
+def docx_to_text(docx_path):
+    """Extract text from Word documents"""
+    # Using UnstructuredFileLoader
+    loader = UnstructuredFileLoader(docx_path)
+    documents = loader.load()
+    text = "\n\n".join([doc.page_content for doc in documents])
+    
+    return text
 
 @api_view(["POST"])
 def upload_and_extract(request):
@@ -110,7 +179,7 @@ def upload_and_extract(request):
     # 📂 Process file if provided
     if file:
         try:
-            # Generate a unique filename to avoid collisions
+            # Generate a unique filename to avoid collisions - REMOVED 'uploads/' prefix
             unique_filename = f"{uuid.uuid4()}-{file.name}"
             file_ext = file.name.split(".")[-1].lower()
             
@@ -126,16 +195,23 @@ def upload_and_extract(request):
             # Upload file to Supabase
             with open(temp_file_path, 'rb') as f:
                 file_content = f.read()
-                
-            # Upload to supabase storage
-            supabase_response = supabase.storage.from_(supabase_bucket).upload(
-                unique_filename,
-                file_content,
-                {"content-type": mime_type}
-            )
             
-            # Get public URL (optional, depending on your bucket settings)
-            file_url = supabase.storage.from_(supabase_bucket).get_public_url(unique_filename)
+            # Simple test upload to debug Supabase connection
+            try:
+                # Upload to supabase storage
+                supabase_response = supabase.storage.from_(supabase_bucket).upload(
+                    unique_filename,
+                    file_content,
+                    {"content-type": mime_type}
+                )
+                
+                # Get public URL (optional, depending on your bucket settings)
+                file_url = supabase.storage.from_(supabase_bucket).get_public_url(unique_filename)
+                
+            except Exception as upload_error:
+                # If upload fails, log the error but continue with text extraction
+                print(f"Supabase upload error: {str(upload_error)}")
+                file_url = None
             
             extracted_text = ""
             
@@ -176,16 +252,20 @@ def upload_and_extract(request):
                 )
             
             # Return success response with extracted text and file info
-            return Response(
-                {
-                    "extracted_text": extracted_text,
-                    "file_info": {
-                        "filename": unique_filename,
-                        "storage_path": unique_filename,
-                        "file_url": file_url
-                    }
+            response_data = {
+                "extracted_text": extracted_text
+            }
+            
+            # Add file info if upload was successful
+            if file_url:
+                response_data["file_info"] = {
+                    "filename": unique_filename,
+                    "storage_path": unique_filename,
+                    "file_url": file_url
                 }
-            )
+            
+            return Response(response_data)
+            
         except Exception as e:
             # Clean up the temporary file if it exists
             if 'temp_file_path' in locals():
@@ -197,6 +277,7 @@ def upload_and_extract(request):
     
     # ❌ If neither YouTube URL nor file is provided
     return Response({"error": "No file or YouTube URL provided"}, status=400)
+
 @api_view(["GET"])
 def health_check(request):
     """
