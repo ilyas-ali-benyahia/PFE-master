@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+
+    container_name: python-backend
+    
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/
+    depends_on:
+      - frontend
+
+  frontend:
+    build: ./frontend
+    container_name: react-frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/src
+    stdin_open: true
+    tty: true
+
+  # Supabase is assumed to be hosted externally

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -22,6 +22,7 @@ import {
   VStack,
   HStack,
   Badge,
+  AspectRatio,
 } from '@chakra-ui/react';
 import { 
   Brain, 
@@ -38,7 +39,9 @@ import {
   Zap,
   Book,
   Award,
-  Hash
+  Hash,
+  Play,
+  Pause
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -72,7 +75,7 @@ const Header = ({ setActiveSection }) => {
   );
 };
 
-const Hero = () => {
+const Hero = ({ scrollToVideo }) => {
   return (
     <Box bg="purple.50" py={20}>
       <Container maxW="6xl">
@@ -96,7 +99,12 @@ const Hero = () => {
                   Start Learning Free
                 </Button>
               </Link>
-              <Button size="lg" variant="outline">
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={scrollToVideo}
+                leftIcon={<Play size={16} />}
+              >
                 Watch Demo
               </Button>
             </Stack>
@@ -206,100 +214,120 @@ const Features = () => {
   );
 };
 
-
-
-// const Resources = () => {
-//   const resources = [
-//     {
-//       icon: Book,
-//       title: "Learning Guides",
-//       description: "Step-by-step guides on how to maximize your learning with StudyVia's AI tools."
-//     },
-//     {
-//       icon: FileText,
-//       title: "Blog Articles",
-//       description: "Insights on education, AI, and learning methodologies from our experts."
-//     },
-//     {
-//       icon: Layout,
-//       title: "Tutorials",
-//       description: "Video and written tutorials to help you make the most of our platform."
-//     },
-//     {
-//       icon: MessageSquare,
-//       title: "Community Forum",
-//       description: "Connect with other learners and share tips, resources, and success stories."
-//     },
-//     {
-//       icon: Award,
-//       title: "Case Studies",
-//       description: "Real-world examples of how StudyVia has transformed learning outcomes."
-//     },
-//     {
-//       icon: Hash,
-//       title: "API Documentation",
-//       description: "Technical resources for developers integrating with our platform."
-//     }
-//   ];
-
-//   return (
-//     <Box py={20} bg="gray.50" id="resources">
-//       <Container maxW="6xl">
-//         <VStack spacing={12}>
-//           <Box textAlign="center">
-//             <Text color="purple.500" fontWeight="semibold" mb={3}>
-//               RESOURCES
-//             </Text>
-//             <Heading mb={4}>Knowledge Hub</Heading>
-//             <Text color="gray.600" fontSize="lg" maxW="2xl">
-//               Explore our collection of resources to enhance your learning journey.
-//             </Text>
-//           </Box>
-
-//           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">
-//             {resources.map((resource, index) => (
-//               <VStack
-//                 key={index}
-//                 align="start"
-//                 p={6}
-//                 bg="white"
-//                 rounded="xl"
-//                 shadow="md"
-//                 borderWidth="1px"
-//                 borderColor="gray.200"
-//                 _hover={{
-//                   transform: "translateY(-4px)",
-//                   shadow: "xl",
-//                   transition: "all 0.3s ease-in-out",
-//                 }}
-//               >
-//                 <Flex
-//                   w={12}
-//                   h={12}
-//                   align="center"
-//                   justify="center"
-//                   rounded="xl"
-//                   bg="purple.100"
-//                   color="purple.600"
-//                   mb={4}
-//                 >
-//                   <Icon as={resource.icon} size={24} />
-//                 </Flex>
-//                 <Text fontWeight="bold" fontSize="lg">
-//                   {resource.title}
-//                 </Text>
-//                 <Text color="gray.600">{resource.description}</Text>
-//                 <Button variant="link" colorScheme="purple" mt={4} rightIcon={<ArrowRight size={16} />}>
-//                   Explore
-//                 </Button>
-//               </VStack>
-//             ))}
-//           </SimpleGrid>
-//         </VStack>
-//       </Container>
-//     </Box>
-//   );
-// };
+// New Video Demo Component
+const DemoVideo = ({ videoRef }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const playerRef = useRef(null);
+  
+  const handlePlayPause = () => {
+    if (playerRef.current) {
+      if (isPlaying) {
+        playerRef.current.pause();
+      } else {
+        playerRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+  
+  return (
+    <Box py={20} bg="white" id="demo-video" ref={videoRef}>
+      <Container maxW="6xl">
+        <VStack spacing={12}>
+          <Box textAlign="center">
+            <Text color="purple.500" fontWeight="semibold" mb={3}>
+              SEE IT IN ACTION
+            </Text>
+            <Heading mb={4}>Experience StudyVia</Heading>
+            <Text color="gray.600" fontSize="lg" maxW="2xl" mb={10}>
+              Watch how our platform transforms learning content into interactive materials 
+              that enhance comprehension and retention.
+            </Text>
+          </Box>
+          
+          <Box 
+            borderRadius="xl" 
+            overflow="hidden" 
+            boxShadow="2xl" 
+            bg="gray.900"
+            w="full"
+            maxW="5xl"
+            mx="auto"
+            transform="perspective(1000px) rotateX(5deg)"
+            _hover={{
+              transform: "perspective(1000px) rotateX(0deg)",
+              transition: "all 0.3s ease-in-out",
+            }}
+            transition="all 0.3s ease-in-out"
+          >
+            <Box p={6} borderBottom="1px" borderColor="gray.700">
+              <Flex justify="space-between" align="center">
+                <HStack>
+                  <Icon as={Brain} color="purple.400" boxSize={6} />
+                  <Text color="white" fontWeight="bold" fontSize="lg">StudyVia Demo</Text>
+                </HStack>
+                <Badge colorScheme="purple" variant="solid" fontSize="sm" px={3} py={1} borderRadius="full">
+                  AI-Powered Learning
+                </Badge>
+              </Flex>
+            </Box>
+            
+            <Box position="relative">
+              <AspectRatio ratio={16/9}>
+                <video
+                  ref={playerRef}
+                  src={require("../assete/pfee.mp4")}
+                  poster="/api/placeholder/1280/720"
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                />
+              </AspectRatio>
+              
+              <Flex
+                position="absolute"
+                bottom={0}
+                left={0}
+                right={0}
+                bg="blackAlpha.700"
+                p={4}
+                backdropFilter="blur(10px)"
+                justify="space-between"
+                align="center"
+              >
+                <Button
+                  variant="solid"
+                  bg="purple.500"
+                  color="white"
+                  onClick={handlePlayPause}
+                  leftIcon={isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                  size="md"
+                  _hover={{ bg: "purple.600" }}
+                  borderRadius="full"
+                  px={6}
+                >
+                  {isPlaying ? 'Pause' : 'Play Demo'}
+                </Button>
+                <Text color="white" fontSize="md" fontWeight="medium">
+                  See how StudyVia transforms your learning experience
+                </Text>
+              </Flex>
+            </Box>
+            
+            <Box p={6} bg="gray.800">
+              <Flex justify="space-between" align="center">
+                <Text color="gray.300" fontSize="sm">Interactive learning demonstration</Text>
+                <HStack>
+                  <Icon as={CheckCircle2} color="green.400" size={16} />
+                  <Text color="green.400" fontSize="sm" fontWeight="medium">AI-Powered</Text>
+                </HStack>
+              </Flex>
+            </Box>
+          </Box>
+        </VStack>
+      </Container>
+    </Box>
+  );
+};
 
 const About = () => {
   const team = [
@@ -514,38 +542,7 @@ const Footer = () => {
     <Box bg="white" py={16}>
       <Container maxW="6xl">
         <SimpleGrid columns={{ base: 1, md: 4 }} spacing={8} mb={8}>
-          {/* <Stack spacing={4}>
-            <HStack spacing={2}>
-              <Icon as={Brain} color="purple.500" boxSize={8} />
-              <Text fontSize="2xl" fontWeight="bold" color="purple.500">
-                StudyVia
-              </Text>
-            </HStack>
-            <Text color="gray.600">
-              Transforming education through AI-powered learning tools.
-            </Text>
-          </Stack> */}
-          
-          {/* <Stack spacing={4}>
-            <Text fontWeight="bold">Product</Text>
-            <Button variant="link" color="gray.600">Features</Button>
-            <Button variant="link" color="gray.600">Pricing</Button>
-            <Button variant="link" color="gray.600">Resources</Button>
-          </Stack>
-          
-          <Stack spacing={4}>
-            <Text fontWeight="bold">Company</Text>
-            <Button variant="link" color="gray.600">About</Button>
-            <Button variant="link" color="gray.600">Blog</Button>
-            <Button variant="link" color="gray.600">Careers</Button>
-          </Stack>
-          
-          <Stack spacing={4}>
-            <Text fontWeight="bold">Legal</Text>
-            <Button variant="link" color="gray.600">Privacy</Button>
-            <Button variant="link" color="gray.600">Terms</Button>
-            <Button variant="link" color="gray.600">Security</Button>
-          </Stack> */}
+          {/* Footer content (commented out in original) */}
         </SimpleGrid>
         
         <Flex
@@ -572,22 +569,37 @@ const Footer = () => {
 
 const LandingPage = () => {
   const [activeSection, setActiveSection] = useState(null);
+  const videoSectionRef = useRef(null);
+  
+  // Function to scroll to the video section
+  const scrollToVideo = () => {
+    videoSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    
+    // Also ensure the video section is visible by setting the active section if needed
+    if (activeSection !== null && activeSection !== 'pricing') {
+      setActiveSection(null); // Go to home view which includes the video
+    }
+  };
 
   // Function to render the appropriate section based on activeSection
   const renderSection = () => {
     switch(activeSection) {
       case 'features':
-        return <Features />;
-     
-      
+        return (
+          <>
+            <Features />
+            <DemoVideo videoRef={videoSectionRef} />
+          </>
+        );
       case 'about':
         return <About />;
       default:
         // Return all sections for default/home view
         return (
           <>
-            <Hero />
+            <Hero scrollToVideo={scrollToVideo} />
             <Features />
+            <DemoVideo videoRef={videoSectionRef} />
             <Testimonials />
             <CTA />
           </>

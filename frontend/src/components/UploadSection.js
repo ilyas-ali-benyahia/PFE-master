@@ -55,7 +55,8 @@ const UploadSection = () => {
         console.error('Error:', error);
         toast({
           title: 'Error',
-          description: 'Failed to process your file. Please try again.',
+          // description: 'Failed to process your file. Please try again.',
+          description: error.message,
           status: 'error',
           duration: 3000,
           isClosable: true,
