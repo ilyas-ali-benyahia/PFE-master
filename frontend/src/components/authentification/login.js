@@ -96,7 +96,7 @@
       
       try {
         // Get the current site URL dynamically
-        const siteUrl = window.location.origin;
+        const siteUrl = https://study-via.vercel.app;
         
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
