@@ -4,10 +4,9 @@ import Register from './components/authentification/rgister';
 import Login from './components/authentification/login';
 import TransformLearningApp from "./dashbord/index";
 
-
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("userInfo"); // Check if user is logged in
+  const isAuthenticated = localStorage.getItem("userInfo");
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
@@ -18,12 +17,16 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        
-        {/* Protect Dashboard Routes */}
-        <Route path="/dashboards" element={<TransformLearningApp />} />
 
-        
-
+        {/* Protect Dashboard */}
+        <Route
+          path="/dashboards"
+          element={
+            <ProtectedRoute>
+              <TransformLearningApp />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
