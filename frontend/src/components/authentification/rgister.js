@@ -95,9 +95,11 @@
       setMessage({ type: '', content: '' });
       
       try {
-        // Get the current site URL dynamically
-        const siteUrl = window.location.origin;
+        const siteUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://study-via.vercel.app'  // Your verified production URL
+          : window.location.origin;         // Dynamic for development
         
+       
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
