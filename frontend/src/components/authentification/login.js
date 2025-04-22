@@ -7,7 +7,6 @@ import {
   Input,
   VStack,
   Text,
-  Divider,
   FormControl,
   FormLabel,
   Alert,
@@ -18,28 +17,19 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   useToast,
   Flex,
   Image,
-  Spinner
 } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
-export default function Auth() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', content: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [tabIndex, setTabIndex] = useState(0);
-  const [session, setSession] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
 
   const navigate = useNavigate();
@@ -54,7 +44,6 @@ export default function Auth() {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
         
         if (session) {
           // Save user info to localStorage
@@ -62,7 +51,7 @@ export default function Auth() {
             token: session.access_token,
             user: session.user
           }));
-          // Use relative path here
+          // Redirect to dashboard
           navigate('/dashboards');
         }
       } catch (error) {
@@ -76,8 +65,6 @@ export default function Auth() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setSession(session);
-        
         if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
           // Save user info to localStorage when signed in
           localStorage.setItem('userInfo', JSON.stringify({
@@ -85,10 +72,6 @@ export default function Auth() {
             user: session.user
           }));
           navigate('/dashboards');
-        } else if (event === 'SIGNED_OUT') {
-          // Remove user info from localStorage when signed out
-          localStorage.removeItem('userInfo');
-          navigate('/login');
         }
       }
     );
@@ -97,11 +80,6 @@ export default function Auth() {
       authListener?.subscription?.unsubscribe();
     };
   }, [navigate]);
-
-  const handleTabsChange = (index) => {
-    setTabIndex(index);
-    setMessage({ type: '', content: '' });
-  };
 
   const handleLogin = async (provider) => {
     setLoading(true);
@@ -148,88 +126,8 @@ export default function Auth() {
       }
       
       showToast('success', 'Successfully logged in!');
-      // Navigation will happen via onAuthStateChange
-    } catch (error) {
-      showToast('error', error.message);
-      setMessage({ type: 'error', content: error.message });
-      setLoading(false);
-    }
-  };
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', content: '' });
-    
-    if (password.length < 6) {
-      setMessage({ type: 'error', content: 'Password must be at least 6 characters' });
-      setLoading(false);
-      return;
-    }
-    
-    try {
-      // Get the current site URL dynamically
-      const siteUrl = window.location.origin;
-      
-      // First create the user
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username, // Store username in user metadata
-          },
-          emailRedirectTo: `${siteUrl}/dashboards` // Add explicit redirect URL
-        },
-      });
-
-      if (error) throw error;
-      
-      // If successful signup, also store in profiles table
-      if (data.user) {
-        // Handle case where user might already exist but isn't confirmed
-        if (data.user.identities?.length === 0) {
-          showToast('info', 'This email is already registered. Please sign in instead.');
-          setTabIndex(0); // Switch to sign in tab
-          setLoading(false);
-          return;
-        }
-        
-        // Create profile entry
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            { 
-              id: data.user.id,
-              username, 
-              email,
-              created_at: new Date().toISOString(),
-            }
-          ])
-          .select();
-          
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Continue with auth flow even if profile creation fails
-        }
-        
-        if (data.session) {
-          // User is automatically signed in (no email confirmation required)
-          // Save user info to localStorage
-          localStorage.setItem('userInfo', JSON.stringify({
-            token: data.session.access_token,
-            user: data.user
-          }));
-          
-          showToast('success', 'Account created successfully!');
-          // Navigation will happen via onAuthStateChange
-        } else {
-          // User needs to confirm email
-          showToast('success', 'Please check your email for confirmation!');
-          setMessage({ type: 'success', content: 'Check your email for the confirmation link!' });
-          setLoading(false);
-        }
-      }
+      // Navigate to dashboard
+      navigate('/dashboards');
     } catch (error) {
       showToast('error', error.message);
       setMessage({ type: 'error', content: error.message });
@@ -239,7 +137,7 @@ export default function Auth() {
 
   const showToast = (status, description) => {
     toast({
-      title: status === 'success' ? 'Success' : status === 'info' ? 'Information' : 'Error',
+      title: status === 'success' ? 'Success' : 'Error',
       description,
       status,
       duration: 5000,
@@ -324,9 +222,9 @@ export default function Auth() {
             mb={2} 
             borderRadius="full" 
           />
-          <Heading size="lg" mb={1}>Welcome</Heading>
+          <Heading size="lg" mb={1}>Welcome Back</Heading>
           <Text color="gray.500" fontSize="md" textAlign="center">
-            {tabIndex === 0 ? 'Sign in to your account' : 'Create a new account'}
+            Sign in to your account
           </Text>
         </Flex>
         
@@ -359,139 +257,77 @@ export default function Auth() {
           </Text>
         </Box>
         
-        <Tabs isFitted variant="soft-rounded" colorScheme="blue" index={tabIndex} onChange={handleTabsChange} width="full">
-          <TabList mb="1em">
-            <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Sign In</Tab>
-            <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Sign Up</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel p={0}>
-              <VStack as="form" onSubmit={handleEmailLogin} spacing={4} w="full">
-                <FormControl id="login-email" isRequired>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    height="45px"
-                  />
-                </FormControl>
-                
-                <FormControl id="login-password" isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <InputGroup>
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      height="45px"
-                    />
-                    <InputRightElement h="full">
-                      <IconButton
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleShowPassword}
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                      />
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-                
-                <Text 
-                  alignSelf="flex-end" 
-                  fontSize="sm" 
-                  color="blue.500" 
-                  cursor="pointer" 
-                  fontWeight="medium"
-                  onClick={handleForgotPassword}
-                >
-                  Forgot password?
-                </Text>
-                
-                <Button
-                  type="submit"
-                  colorScheme="blue"
-                  size="lg"
-                  w="full"
-                  isLoading={loading}
-                  loadingText="Signing In"
-                  height="50px"
-                  mt={2}
-                >
-                  Sign In
-                </Button>
-              </VStack>
-            </TabPanel>
-            
-            <TabPanel p={0}>
-              <VStack as="form" onSubmit={handleSignUp} spacing={4} w="full">
-                <FormControl id="signup-username" isRequired>
-                  <FormLabel>Username</FormLabel>
-                  <Input
-                    type="text"
-                    placeholder="Choose a username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    height="45px"
-                  />
-                </FormControl>
-                
-                <FormControl id="signup-email" isRequired>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    height="45px"
-                  />
-                </FormControl>
-                
-                <FormControl id="signup-password" isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <InputGroup>
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Create a password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      height="45px"
-                    />
-                    <InputRightElement h="full">
-                      <IconButton
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleShowPassword}
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                      />
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-                
-                <Text fontSize="xs" color="gray.500" alignSelf="flex-start">
-                  By signing up, you agree to our Terms of Service and Privacy Policy
-                </Text>
-                
-                <Button
-                  type="submit"
-                  colorScheme="blue"
-                  size="lg"
-                  w="full"
-                  isLoading={loading}
-                  loadingText="Creating Account"
-                  height="50px"
-                  mt={2}
-                >
-                  Create Account
-                </Button>
-              </VStack>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+        <VStack as="form" onSubmit={handleEmailLogin} spacing={4} w="full">
+          <FormControl id="login-email" isRequired>
+            <FormLabel>Email</FormLabel>
+            <Input
+              type="email"
+              placeholder="your.email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              height="45px"
+            />
+          </FormControl>
+          
+          <FormControl id="login-password" isRequired>
+            <FormLabel>Password</FormLabel>
+            <InputGroup>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                height="45px"
+              />
+              <InputRightElement h="full">
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  onClick={toggleShowPassword}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                />
+              </InputRightElement>
+            </InputGroup>
+          </FormControl>
+          
+          <Text 
+            alignSelf="flex-end" 
+            fontSize="sm" 
+            color="blue.500" 
+            cursor="pointer" 
+            fontWeight="medium"
+            onClick={handleForgotPassword}
+          >
+            Forgot password?
+          </Text>
+          
+          <Button
+            type="submit"
+            colorScheme="blue"
+            size="lg"
+            w="full"
+            isLoading={loading}
+            loadingText="Signing In"
+            height="50px"
+            mt={2}
+          >
+            Sign In
+          </Button>
+          
+          <Text mt={4} textAlign="center">
+            Don't have an account?{" "}
+            <Text
+              as="span"
+              color="blue.500"
+              fontWeight="medium"
+              cursor="pointer"
+              onClick={() => navigate('/register')}
+            >
+              Sign up
+            </Text>
+          </Text>
+        </VStack>
       </VStack>
     </Container>
   );
