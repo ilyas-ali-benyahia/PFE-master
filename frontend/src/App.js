@@ -2,13 +2,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase"; // Make sure to import supabase
 import LandingPage from './landinpage';
-import Auth from './components/authentification/Auth'; // Use your combined Auth component
+import Register from './components/authentification/rgister'; // Use your existing register component
+import Login from './components/authentification/login'; // Use your existing login component
 import TransformLearningApp from "./dashbord/index";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem("userInfo");
-  return isAuthenticated ? children : <Navigate to="/auth" replace />;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -63,7 +64,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={<Auth />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         {/* Protect Dashboard */}
         <Route
           path="/dashboards/*"
@@ -73,9 +75,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Redirect old routes to the new Auth component */}
-        <Route path="/register" element={<Navigate to="/auth" replace />} />
-        <Route path="/login" element={<Navigate to="/auth" replace />} />
       </Routes>
     </BrowserRouter>
   );
