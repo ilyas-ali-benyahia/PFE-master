@@ -12,6 +12,7 @@ import {
   Alert,
   AlertIcon,
   useColorModeValue,
+  Divider,
   Container,
   Heading,
   InputGroup,
