@@ -13,11 +13,13 @@ import {
   Badge,
   Spinner,
   Tooltip,
-  IconButton
+  IconButton,
+  Container
 } from '@chakra-ui/react';
 import { FaPaperPlane, FaRobot, FaUser, FaEye, FaEyeSlash, FaExpand, FaCompress } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
 import * as api from '../services/api';
+import { supabase } from '../supabase'; // Update this path to your Supabase client
 
 const ChatSection = () => {
   const { state, actions } = useApp();
@@ -30,10 +32,50 @@ const ChatSection = () => {
   // New state variables
   const [showContent, setShowContent] = useState(true);
   const [expandedChat, setExpandedChat] = useState(false);
-  const [chatHeight, setChatHeight] = useState('300px');
+  const [chatHeight, setChatHeight] = useState({ base: '250px', md: '300px', lg: '300px' });
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    // Get the session when component mounts
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
+        setToken(data.session.access_token);
+      }
+    };
+    
+    getSession();
+    
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session) {
+          setToken(session.access_token);
+        } else {
+          setToken(null);
+        }
+      }
+    );
+    
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
 
   const handleChatSubmit = async () => {
     if (!userMessage.trim()) return;
+    
+    if (!token) {
+      toast({
+        title: 'Authentication Error',
+        description: 'You must be logged in to use the chat.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+      return;
+    }
 
     setIsChatLoading(true);
     const userMessageObj = { role: 'user', content: userMessage };
@@ -41,7 +83,7 @@ const ChatSection = () => {
     setUserMessage('');
 
     try {
-      const response = await api.sendChatMessage(userMessage);
+      const response = await api.sendChatMessage(userMessage, token);
       const botMessageObj = { role: 'bot', content: response.response };
       addChatMessage(botMessageObj);
     } catch (error) {
@@ -63,7 +105,10 @@ const ChatSection = () => {
 
   const toggleChatExpansion = () => {
     setExpandedChat(!expandedChat);
-    setChatHeight(expandedChat ? '300px' : '500px');
+    setChatHeight(expandedChat ? 
+      { base: '250px', md: '300px', lg: '300px' } : 
+      { base: '400px', md: '500px', lg: '500px' }
+    );
   };
 
   // Simple toggle for content visibility
@@ -82,7 +127,7 @@ const ChatSection = () => {
     inputRef.current?.focus();
   }, []);
 
-  if (state.activeTab !== 4) {
+  if (state.studyOptionsActiveTab !== 4) {
     return null; // Only show chat section for the Chatbot option
   }
 
@@ -91,26 +136,47 @@ const ChatSection = () => {
   };
 
   return (
-    <Box borderRadius="xl" p={6} mt={6} bg="white" boxShadow="lg">
-      <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="lg" color="gray.800">
+    <Box 
+      borderRadius="xl" 
+      p={{ base: 3, md: 6 }} 
+      mt={6} 
+      bg="white" 
+      boxShadow="lg"
+      width="100%"
+    >
+      <Flex 
+        justify="space-between" 
+        align={{ base: "start", md: "center" }} 
+        mb={6}
+        direction={{ base: "column", md: "row" }}
+        gap={{ base: 3, md: 0 }}
+      >
+        <Heading 
+          size={{ base: "md", md: "lg" }} 
+          color="gray.800"
+        >
           Chat with the AI about your content
         </Heading>
-        <Flex gap={2}>
+        <Flex 
+          gap={2} 
+          width={{ base: "100%", md: "auto" }}
+          justifyContent={{ base: "space-between", md: "flex-end" }}
+        >
           <Tooltip label={showContent ? "Hide content" : "Show content"}>
             <Button 
-              size="sm" 
+              size={{ base: "xs", md: "sm" }}
               colorScheme="purple"
               variant="outline" 
               leftIcon={showContent ? <FaEyeSlash /> : <FaEye />}
               onClick={toggleContentVisibility}
+              flexGrow={{ base: 1, md: 0 }}
             >
               {showContent ? "Hide Content" : "Show Content"}
             </Button>
           </Tooltip>
           <Tooltip label={expandedChat ? "Compress chat" : "Expand chat"}>
             <IconButton
-              size="sm"
+              size={{ base: "xs", md: "sm" }}
               colorScheme="purple"
               variant="outline"
               icon={expandedChat ? <FaCompress /> : <FaExpand />}
@@ -121,17 +187,27 @@ const ChatSection = () => {
         </Flex>
       </Flex>
       
-      <Flex direction={{ base: 'column', md: 'row' }} gap={4}>
+      <Flex 
+        direction={{ base: 'column', lg: 'row' }} 
+        gap={4}
+      >
         {/* Extracted Text Panel - Only shown when showContent is true */}
         {showContent && (
-          <Box flex={1} bg="gray.50" borderRadius="md" p={4} mb={{ base: 4, md: 0 }}>
+          <Box 
+            flex={1} 
+            bg="gray.50" 
+            borderRadius="md" 
+            p={{ base: 3, md: 4 }} 
+            mb={{ base: 4, lg: 0 }}
+            width="100%"
+          >
             <Flex align="center" mb={3}>
               <Badge colorScheme="blue" mr={2}>Source</Badge>
               <Text fontWeight="bold">Extracted Text</Text>
             </Flex>
             
             <Box 
-              maxH="300px" 
+              maxH={{ base: "200px", md: "300px" }}
               overflowY="auto" 
               p={3} 
               borderRadius="md" 
@@ -140,9 +216,9 @@ const ChatSection = () => {
               bg="white"
             >
               {generatedText ? (
-                <Text whiteSpace="pre-wrap">{generatedText}</Text>
+                <Text whiteSpace="pre-wrap" fontSize={{ base: "sm", md: "md" }}>{generatedText}</Text>
               ) : (
-                <Text color="gray.500" fontStyle="italic">No text extracted yet</Text>
+                <Text color="gray.500" fontStyle="italic" fontSize={{ base: "sm", md: "md" }}>No text extracted yet</Text>
               )}
             </Box>
           </Box>
@@ -156,7 +232,7 @@ const ChatSection = () => {
             h={chatHeight}
             overflowY="auto" 
             mb={4} 
-            p={4} 
+            p={{ base: 2, md: 4 }}
             bg="gray.50" 
             borderRadius="md"
             borderWidth="1px" 
@@ -165,8 +241,8 @@ const ChatSection = () => {
           >
             {chatMessages.length === 0 ? (
               <Flex direction="column" justify="center" align="center" h="100%" opacity={0.7}>
-                <Icon as={FaRobot} fontSize="3xl" mb={2} color="purple.500" />
-                <Text color="gray.500">Start a conversation about your content</Text>
+                <Icon as={FaRobot} fontSize={{ base: "xl", md: "3xl" }} mb={2} color="purple.500" />
+                <Text color="gray.500" fontSize={{ base: "xs", md: "sm" }}>Start a conversation about your content</Text>
               </Flex>
             ) : (
               chatMessages.map((message, index) => (
@@ -177,53 +253,62 @@ const ChatSection = () => {
                   direction={message.role === 'user' ? 'row-reverse' : 'row'}
                 >
                   <Avatar 
-                    size="sm" 
+                    size={{ base: "xs", md: "sm" }}
                     icon={<Icon as={message.role === 'user' ? FaUser : FaRobot} />}
                     bg={message.role === 'user' ? 'purple.500' : 'gray.500'} 
                   />
                   <Box
-                    ml={message.role === 'user' ? 0 : 2}
-                    mr={message.role === 'user' ? 2 : 0}
-                    p={3}
+                    ml={message.role === 'user' ? 0 : { base: 1, md: 2 }}
+                    mr={message.role === 'user' ? { base: 1, md: 2 } : 0}
+                    p={{ base: 2, md: 3 }}
                     bg={message.role === 'user' ? 'purple.100' : 'white'}
                     color="gray.800"
                     borderRadius="lg"
-                    maxW="80%"
+                    maxW={{ base: "75%", md: "80%" }}
                     boxShadow="sm"
                     borderWidth="1px"
                     borderColor={message.role === 'user' ? 'purple.200' : 'gray.200'}
                   >
                     <Flex justify="space-between" align="center" mb={1}>
-                      <Text fontSize="sm" fontWeight="medium" color="gray.500">
+                      <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium" color="gray.500">
                         {message.role === 'user' ? 'You' : 'AI'} • {formatTimestamp()}
                       </Text>
                     </Flex>
-                    <Text whiteSpace="pre-wrap">{message.content}</Text>
+                    <Text 
+                      whiteSpace="pre-wrap"
+                      fontSize={{ base: "xs", md: "sm" }}
+                    >
+                      {message.content}
+                    </Text>
                   </Box>
                 </Flex>
               ))
             )}
             {isChatLoading && (
               <Flex justify="flex-start" align="center" mt={2}>
-                <Avatar size="sm" bg="gray.500" icon={<Icon as={FaRobot} />} />
+                <Avatar 
+                  size={{ base: "xs", md: "sm" }} 
+                  bg="gray.500" 
+                  icon={<Icon as={FaRobot} />} 
+                />
                 <Flex 
-                  ml={2} 
-                  p={3} 
+                  ml={{ base: 1, md: 2 }}
+                  p={{ base: 2, md: 3 }}
                   bg="white" 
                   borderRadius="lg" 
                   align="center"
                   borderWidth="1px"
                   borderColor="gray.200"
                 >
-                  <Spinner size="sm" mr={2} color="purple.500" />
-                  <Text fontSize="sm">AI is thinking...</Text>
+                  <Spinner size={{ base: "xs", md: "sm" }} mr={2} color="purple.500" />
+                  <Text fontSize={{ base: "xs", md: "sm" }}>AI is thinking...</Text>
                 </Flex>
               </Flex>
             )}
           </Box>
 
           {/* Chat Input */}
-          <InputGroup size="md">
+          <InputGroup size={{ base: "sm", md: "md" }}>
             <Input
               ref={inputRef}
               value={userMessage}
@@ -235,9 +320,10 @@ const ChatSection = () => {
               bg="white"
               borderWidth="1px"
               focusBorderColor="purple.400"
-              disabled={isChatLoading}
+              disabled={isChatLoading || !token}
+              fontSize={{ base: "sm", md: "md" }}
             />
-            <Tooltip label={isChatLoading ? "Waiting for response" : "Send message"}>
+            <Tooltip label={!token ? "Please log in to chat" : isChatLoading ? "Waiting for response" : "Send message"}>
               <Button
                 colorScheme="purple"
                 position="absolute"
@@ -247,14 +333,14 @@ const ChatSection = () => {
                 zIndex={2}
                 onClick={handleChatSubmit}
                 isLoading={isChatLoading}
-                isDisabled={!userMessage.trim() || isChatLoading}
+                isDisabled={!userMessage.trim() || isChatLoading || !token}
                 borderRadius="full"
-                size="sm"
+                size={{ base: "xs", md: "sm" }}
                 p={1}
-                width="2rem"
-                height="2rem"
+                width={{ base: "1.5rem", md: "2rem" }}
+                height={{ base: "1.5rem", md: "2rem" }}
               >
-                <Icon as={FaPaperPlane} fontSize="sm" />
+                <Icon as={FaPaperPlane} fontSize={{ base: "xs", md: "sm" }} />
               </Button>
             </Tooltip>
           </InputGroup>
