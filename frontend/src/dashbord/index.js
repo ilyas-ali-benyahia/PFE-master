@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppProvider } from '../context/AppContext';
 import UploadSection from '../components/UploadSection';
@@ -11,33 +10,16 @@ import {
   Flex,
   Heading,
   Icon,
-  List,
-  ListItem,
   Text,
   useColorModeValue,
   VStack,
   HStack,
-  useDisclosure,
-  Collapse,
-  IconButton,
-  Divider,
-  Tooltip,
-  Badge,
   SimpleGrid,
   Image
 } from '@chakra-ui/react';
 import { 
   Brain,
   FileText,
-  ChevronDown,
-  ChevronUp,
-  History,
-  X,
-  File,
-  FileImage,
-  FileVideo,
-  FileAudio,
-  FileArchive,
   Layout,
   MessageSquare,
   Share2,
@@ -57,13 +39,12 @@ const Header = ({ setActiveSection }) => {
             </Text>
           </HStack>
           <HStack spacing={8} display={{ base: 'none', md: 'flex' }}>
-          <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
+            <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
             <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>            
             {/* <Button variant="ghost" onClick={() => setActiveSection('resources')}>Resources</Button> */}
             <Button variant="ghost" onClick={() => setActiveSection('about')}>About</Button>
           </HStack>
           <HStack spacing={4}>
-            
             <Link to="/"><Button colorScheme="purple">Logout</Button></Link>
           </HStack>
         </Flex>
@@ -71,8 +52,6 @@ const Header = ({ setActiveSection }) => {
     </Box>
   );
 };
-
-
 
 const Features = () => {
   const features = [
@@ -108,7 +87,6 @@ const Features = () => {
     }
   ];
   
-
   return (
     <Box py={20} bg="gray.50" id="features">
       <Container maxW="6xl">
@@ -165,7 +143,6 @@ const Features = () => {
   );
 };
 
-
 const About = () => {
   const team = [
     {
@@ -206,7 +183,7 @@ const About = () => {
               <Heading size="lg" mb={6}>Our Story</Heading>
               <Text color="gray.600" mb={4}>
                 our platform  was founded  by master's students and a research supervisor  who recognized the immense potential of artificial intelligence
-                in education.Driven by apassion for innovation, they set out to createa smarter, more efficient learning experience powered by AI
+                in education. Driven by a passion for innovation, they set out to create a smarter, more efficient learning experience powered by AI
               </Text>
               <Text color="gray.600" mb={4}>
                 After months of research and development, we created a platform that can transform any content into 
@@ -298,24 +275,11 @@ const Footer = () => {
   );
 };
 
-
 const App = () => {
   const bgColor = useColorModeValue('purple.50', 'gray.900');
   const [activeSection, setActiveSection] = useState('home');
-  const [uploadedFiles, setUploadedFiles] = useState(getStoredFiles());
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
-
-  // Save to localStorage whenever uploadedFiles changes
-  useEffect(() => {
-    try {
-      // Only save files that aren't examples
-      const filesToStore = uploadedFiles.filter(file => !file.isExample);
-      localStorage.setItem('uploadedFiles', JSON.stringify(filesToStore));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  }, [uploadedFiles]);
 
   const handleFileUpload = (file) => {
     const newFile = { 
@@ -330,35 +294,6 @@ const App = () => {
     setSelectedFile(newFile);
   };
 
-  const handleSelectFile = (file, index) => {
-    if (file.isExample) {
-      // Handle example file selection
-      setSelectedFile(file);
-    } else {
-      // Handle user file selection
-      setUploadedFiles(prev => 
-        prev.map((f, i) => ({ 
-          ...f, 
-          isSelected: i === index 
-        }))
-      );
-      setSelectedFile(file);
-    }
-  };
-
-  const handleRemoveFile = (index) => {
-    setUploadedFiles(prev => {
-      const newFiles = prev.filter((_, i) => i !== index);
-      if (prev[index].isSelected) {
-        setSelectedFile(newFiles[0] || null);
-        if (newFiles[0]) {
-          newFiles[0].isSelected = true;
-        }
-      }
-      return newFiles;
-    });
-  };
-
   const renderSection = () => {
     switch(activeSection) {
       case 'features':
@@ -369,22 +304,14 @@ const App = () => {
       default:
         return (
           <AppProvider>
-            <Box w="100vw" minH="100vh" bg={bgColor} color="gray.800">
-              
-               
-              <Box 
-                ml={isOpen ? "300px" : "60px"} 
-                transition="all 0.3s ease"
-                p={4}
-              >
-                <Flex flex={1} justifyContent="center" alignItems="center" py={8}>
-                  <Container maxW="container.xl">
-                    <UploadSection onFileUpload={handleFileUpload} />
-                    <StudyOptions selectedFile={selectedFile} />
-                    <ResultsSection selectedFile={selectedFile} />
-                  </Container>
-                </Flex>
-              </Box>
+            <Box w="100%" minH="100vh" bg={bgColor} color="gray.800">
+              <Flex flex={1} justifyContent="center" alignItems="center" py={8}>
+                <Container maxW="container.xl">
+                  <UploadSection onFileUpload={handleFileUpload} />
+                  <StudyOptions selectedFile={selectedFile} />
+                  <ResultsSection selectedFile={selectedFile} />
+                </Container>
+              </Flex>
             </Box>
           </AppProvider>
         );
@@ -393,7 +320,7 @@ const App = () => {
 
   return (
     <Box>
-       <Header  setActiveSection={setActiveSection} />
+      <Header setActiveSection={setActiveSection} />
       {renderSection()}
       <Footer />
     </Box>
