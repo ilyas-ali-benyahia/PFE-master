@@ -8,7 +8,8 @@ const initialState = {
   file: null,
   youtubeUrl: '',
   showStudyOptions: false,
-  activeTab: 0,
+  studyOptionsActiveTab: 0, // Changed from setstudyOptionsActiveTab to studyOptionsActiveTab with default -1
+  uploadSectionActiveTab: -1, // Corrected from UploadSectionActiveTab
   isProcessing: false,
   progressValue: 0,
   generatedText: '',
@@ -27,8 +28,10 @@ function appReducer(state, action) {
       return { ...state, youtubeUrl: action.payload };
     case 'SET_SHOW_STUDY_OPTIONS':
       return { ...state, showStudyOptions: action.payload };
-    case 'SET_ACTIVE_TAB':
-      return { ...state, activeTab: action.payload };
+    case 'SET_STUDY_OPTIONS_ACTIVE_TAB': // Added correct action type
+      return { ...state, studyOptionsActiveTab: action.payload };
+    case 'SET_UPLOAD_SECTION_ACTIVE_TAB': // Added correct action type
+      return { ...state, uploadSectionActiveTab: action.payload };
     case 'SET_IS_PROCESSING':
       return { ...state, isProcessing: action.payload };
     case 'SET_PROGRESS_VALUE':
@@ -58,7 +61,8 @@ export const AppProvider = ({ children }) => {
     setFile: (file) => dispatch({ type: 'SET_FILE', payload: file }),
     setYoutubeUrl: (url) => dispatch({ type: 'SET_YOUTUBE_URL', payload: url }),
     setShowStudyOptions: (show) => dispatch({ type: 'SET_SHOW_STUDY_OPTIONS', payload: show }),
-    setActiveTab: (tab) => dispatch({ type: 'SET_ACTIVE_TAB', payload: tab }),
+    setstudyOptionsActiveTab: (tab) => dispatch({ type: 'SET_STUDY_OPTIONS_ACTIVE_TAB', payload: tab }), // Fixed action name
+    setUploadSectionActiveTab: (tab) => dispatch({ type: 'SET_UPLOAD_SECTION_ACTIVE_TAB', payload: tab }), // Fixed action name
     setIsProcessing: (isProcessing) => dispatch({ type: 'SET_IS_PROCESSING', payload: isProcessing }),
     setProgressValue: (value) => dispatch({ type: 'SET_PROGRESS_VALUE', payload: value }),
     setGeneratedText: (text) => dispatch({ type: 'SET_GENERATED_TEXT', payload: text }),
