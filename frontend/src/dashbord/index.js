@@ -58,7 +58,7 @@ const Header = ({ setActiveSection }) => {
             <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
             <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>           
             <Button variant="ghost" onClick={() => setActiveSection('about')}>About</Button>
-            <ChakraLink href="https://docs.google.com/forms/d/1ujVnRl-aSCFXsxrk2yFIWHsrKaR4BpLx2W7ohcJ0SSY/edit" isExternal>
+            <ChakraLink href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?usp=sharing" isExternal>
               <Button leftIcon={<Icon as={MessageCircle} />} colorScheme="teal" variant="outline">
                 Feedback
               </Button>
@@ -112,7 +112,7 @@ const Header = ({ setActiveSection }) => {
                     About
                   </Button>
                   <ChakraLink 
-                    href="https://docs.google.com/forms/d/1ujVnRl-aSCFXsxrk2yFIWHsrKaR4BpLx2W7ohcJ0SSY/edit" 
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?usp=sharing" 
                     isExternal
                     w="100%"
                   >
@@ -357,7 +357,7 @@ const Footer = () => {
               © {new Date().getFullYear()} StudyVia. All rights reserved.
             </Text>
             <ChakraLink 
-              href="https://docs.google.com/forms/d/1ujVnRl-aSCFXsxrk2yFIWHsrKaR4BpLx2W7ohcJ0SSY/edit" 
+              href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?usp=sharing" 
               isExternal
               color="purple.500"
               display="flex"
