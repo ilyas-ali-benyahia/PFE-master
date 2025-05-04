@@ -16,20 +16,32 @@ import {
   HStack,
   SimpleGrid,
   Image,
-  Link as ChakraLink
+  Link as ChakraLink,
+  IconButton,
+  useDisclosure,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton
 } from '@chakra-ui/react';
 import { 
   Brain,
   FileText,
   Layout,
   MessageSquare,
-   MessageCircle,
+  MessageCircle,
   Share2,
-  ClipboardList
+  ClipboardList,
+  Menu
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Header = ({ setActiveSection }) => {
+  // Add mobile menu functionality
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <Box bg="white" py={4} borderBottom="1px" borderColor="gray.100">
       <Container maxW="6xl">
@@ -40,20 +52,86 @@ const Header = ({ setActiveSection }) => {
               StudyVia
             </Text>
           </HStack>
+          
+          {/* Desktop navigation - only displayed on md screens and up */}
           <HStack spacing={8} display={{ base: 'none', md: 'flex' }}>
             <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
-            <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>            
-            {/* <Button variant="ghost" onClick={() => setActiveSection('resources')}>Resources</Button> */}
+            <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>           
             <Button variant="ghost" onClick={() => setActiveSection('about')}>About</Button>
-            <ChakraLink href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?fbzx=7072848991256334064" isExternal>
+            <ChakraLink href="https://docs.google.com/forms/d/1ujVnRl-aSCFXsxrk2yFIWHsrKaR4BpLx2W7ohcJ0SSY/edit" isExternal>
               <Button leftIcon={<Icon as={MessageCircle} />} colorScheme="teal" variant="outline">
                 Feedback
               </Button>
             </ChakraLink>
           </HStack>
-          <HStack spacing={4}>
+          
+          {/* Desktop CTA buttons */}
+          <HStack spacing={4} display={{ base: 'none', md: 'flex' }}>
             <Link to="/"><Button colorScheme="purple">Logout</Button></Link>
           </HStack>
+          
+          {/* Mobile menu button */}
+          <IconButton
+            aria-label="Open menu"
+            icon={<Icon as={Menu} />}
+            variant="ghost"
+            display={{ base: 'flex', md: 'none' }}
+            onClick={onOpen}
+          />
+
+          {/* Mobile drawer menu */}
+          <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+            <DrawerOverlay />
+            <DrawerContent>
+              <DrawerCloseButton />
+              <DrawerHeader>Menu</DrawerHeader>
+              <DrawerBody>
+                <VStack spacing={4} align="stretch">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('pricing');
+                      onClose();
+                    }}>
+                    Home
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('features');
+                      onClose();
+                    }}>
+                    Features
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('about');
+                      onClose();
+                    }}>
+                    About
+                  </Button>
+                  <ChakraLink 
+                    href="https://docs.google.com/forms/d/1ujVnRl-aSCFXsxrk2yFIWHsrKaR4BpLx2W7ohcJ0SSY/edit" 
+                    isExternal
+                    w="100%"
+                  >
+                    <Button 
+                      leftIcon={<Icon as={MessageCircle} />} 
+                      colorScheme="teal" 
+                      variant="outline"
+                      w="100%"
+                    >
+                      Feedback
+                    </Button>
+                  </ChakraLink>
+                  <Link to="/" style={{ width: '100%' }}>
+                    <Button colorScheme="purple" w="100%">Logout</Button>
+                  </Link>
+                </VStack>
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
         </Flex>
       </Container>
     </Box>
@@ -263,14 +341,32 @@ const Footer = () => {
         <Flex
           direction={{ base: 'column', md: 'row' }}
           justify="space-between"
-          align="center"
+          align={{ base: 'center', md: 'flex-start' }}
           borderTopWidth={1}
           borderColor="gray.200"
           pt={8}
         >
-          <Text color="gray.600">
-            © {new Date().getFullYear()} StudyVia. All rights reserved.
-          </Text>
+          <VStack align={{ base: 'center', md: 'flex-start' }} spacing={4}>
+            <HStack spacing={2}>
+              <Icon as={Brain} color="purple.500" boxSize={6} />
+              <Text fontSize="xl" fontWeight="bold" color="purple.500">
+                StudyVia
+              </Text>
+            </HStack>
+            <Text color="gray.600">
+              © {new Date().getFullYear()} StudyVia. All rights reserved.
+            </Text>
+            <ChakraLink 
+              href="https://docs.google.com/forms/d/1ujVnRl-aSCFXsxrk2yFIWHsrKaR4BpLx2W7ohcJ0SSY/edit" 
+              isExternal
+              color="purple.500"
+              display="flex"
+              alignItems="center"
+            >
+              <Icon as={MessageCircle} mr={2} />
+              Share your feedback
+            </ChakraLink>
+          </VStack>
           <HStack spacing={4} mt={{ base: 4, md: 0 }}>
             <Button variant="ghost" size="sm">Twitter</Button>
             <Button variant="ghost" size="sm">LinkedIn</Button>
