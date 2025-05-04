@@ -15,13 +15,15 @@ import {
   VStack,
   HStack,
   SimpleGrid,
-  Image
+  Image,
+  Link as ChakraLink
 } from '@chakra-ui/react';
 import { 
   Brain,
   FileText,
   Layout,
   MessageSquare,
+   MessageCircle,
   Share2,
   ClipboardList
 } from 'lucide-react';
@@ -43,6 +45,11 @@ const Header = ({ setActiveSection }) => {
             <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>            
             {/* <Button variant="ghost" onClick={() => setActiveSection('resources')}>Resources</Button> */}
             <Button variant="ghost" onClick={() => setActiveSection('about')}>About</Button>
+            <ChakraLink href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?fbzx=7072848991256334064" isExternal>
+              <Button leftIcon={<Icon as={MessageCircle} />} colorScheme="teal" variant="outline">
+                Feedback
+              </Button>
+            </ChakraLink>
           </HStack>
           <HStack spacing={4}>
             <Link to="/"><Button colorScheme="purple">Logout</Button></Link>
