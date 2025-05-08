@@ -368,42 +368,7 @@ const DemoVideo = ({ videoRef }) => {
               {/* Controls */}
               
             </Box>
-            <Flex
-                position="absolute"
-                bottom={0}
-                w="full"
-                px={6}
-                py={4}
-                bg="blackAlpha.600"
-                backdropFilter="blur(10px)"
-                align="center"
-                justify="space-between"
-                flexDir={{ base: "column", sm: "row" }}
-                gap={4}
-              >
-                <Button
-                  leftIcon={isPlaying ? <Pause size={18} /> : <Play size={18} />}
-                  onClick={handlePlayPause}
-                  bg="purple.500"
-                  color="white"
-                  borderRadius="full"
-                  px={6}
-                  size="md"
-                  _hover={{ bg: "purple.600" }}
-                  w={{ base: "full", sm: "auto" }}
-                >
-                  {isPlaying ? "Pause" : "Play Demo"}
-                </Button>
-
-                <Text
-                  color="white"
-                  fontSize={{ base: "xs", sm: "sm" }}
-                  fontWeight="medium"
-                  display={{ base: "none", sm: "block" }}
-                >
-                  See how StudyVia transforms your learning experience
-                </Text>
-              </Flex>
+           
             {/* Footer */}
             <Flex
               px={6}
