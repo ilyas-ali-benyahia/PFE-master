@@ -342,7 +342,10 @@ const DemoVideo = ({ videoRef }) => {
               borderColor="gray.700"
             >
               <HStack spacing={3}>
-                <Icon as={Brain} color="purple.400" boxSize={6} />
+                <Image 
+                          src={require('../assete/logo.png')} 
+                          boxSize={10}
+                        />
                 <Text color="white" fontWeight="semibold" fontSize="lg">StudyVia Demo</Text>
               </HStack>
               <Badge colorScheme="purple" borderRadius="full" px={3} py={1} fontSize="xs">
