@@ -47,7 +47,10 @@ const Header = ({ setActiveSection }) => {
       <Container maxW="6xl">
         <Flex justify="space-between" align="center">
           <HStack spacing={2}>
-            <Icon as={Brain} color="purple.500" boxSize={8} />
+            <Image 
+                          src={require('../assete/logo.png')} 
+                          boxSize={10}
+                        />
             <Text fontSize="2xl" fontWeight="bold" color="purple.500">
               StudyVia
             </Text>
@@ -348,7 +351,10 @@ const Footer = () => {
         >
           <VStack align={{ base: 'center', md: 'flex-start' }} spacing={4}>
             <HStack spacing={2}>
-              <Icon as={Brain} color="purple.500" boxSize={6} />
+              <Image 
+                          src={require('../assete/logo.png')} 
+                          boxSize={10}
+                        />
               <Text fontSize="xl" fontWeight="bold" color="purple.500">
                 StudyVia
               </Text>
