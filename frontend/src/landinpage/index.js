@@ -154,9 +154,9 @@ const Hero = ({ scrollToVideo }) => {
               <chakra.span color="purple.500"> AI-Powered</chakra.span> Education
             </Heading>
             <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" mb={8}>
-              Upload any content and watch it transform into interactive learning materials.
-Our AI-powered platform supports both Arabic and English, allowing you to enhance your understanding 
-  through automatically generated flashcards, quizzes, mind maps, summaries, and chatbot assistance — all tailored to your language and learning style
+              Upload any content and let AI turn it into interactive learning materials.
+              Our platform supports Arabic and English, offering flashcards, quizzes, mind maps,
+              summaries, and smart chatbot assistance — all tailored to your learning style
             </Text>
             <Stack direction={{ base: 'column', sm: 'row' }} spacing={4}>
               <Link to="/register">
