@@ -23,6 +23,14 @@ import {
   HStack,
   Badge,
   AspectRatio,
+  IconButton,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  useDisclosure
 } from '@chakra-ui/react';
 import { 
   Brain, 
@@ -41,7 +49,8 @@ import {
   Award,
   Hash,
   Play,
-  Pause
+  Pause,
+  Menu
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -49,26 +58,85 @@ import Login from '../components/authentification/login';
 import Register from '../components/authentification/rgister';
 
 const Header = ({ setActiveSection }) => {
+  // Add mobile menu functionality
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <Box bg="white" py={4} borderBottom="1px" borderColor="gray.100">
       <Container maxW="6xl">
         <Flex justify="space-between" align="center">
           <HStack spacing={2}>
-            <Icon as={Brain} color="purple.500" boxSize={8} />
+            <Image 
+                                    src={require('../assete/logo.png')} 
+                                    boxSize={8} 
+                                  />
             <Text fontSize="2xl" fontWeight="bold" color="purple.500">
               StudyVia
             </Text>
           </HStack>
+          
+          {/* Desktop navigation - only displayed on md screens and up */}
           <HStack spacing={8} display={{ base: 'none', md: 'flex' }}>
-          <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
-            <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>            
-            {/* <Button variant="ghost" onClick={() => setActiveSection('resources')}>Resources</Button> */}
+            <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
+            <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>           
             <Button variant="ghost" onClick={() => setActiveSection('about')}>About</Button>
           </HStack>
-          <HStack spacing={4}>
+          
+          {/* Desktop CTA buttons */}
+          <HStack spacing={4} display={{ base: 'none', md: 'flex' }}>
             <Link to="/login"><Button variant="ghost">Sign in</Button></Link> 
             <Link to="/register"><Button colorScheme="purple">Get Started</Button></Link>
           </HStack>
+          
+          {/* Mobile menu button */}
+          <IconButton
+            aria-label="Open menu"
+            icon={<Icon as={Menu} />}
+            variant="ghost"
+            display={{ base: 'flex', md: 'none' }}
+            onClick={onOpen}
+          />
+
+          {/* Mobile drawer menu */}
+          <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+            <DrawerOverlay />
+            <DrawerContent>
+              <DrawerCloseButton />
+              <DrawerHeader>Menu</DrawerHeader>
+              <DrawerBody>
+                <VStack spacing={4} align="stretch">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('pricing');
+                      onClose();
+                    }}>
+                    Home
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('features');
+                      onClose();
+                    }}>
+                    Features
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('about');
+                      onClose();
+                    }}>
+                    About
+                  </Button>
+                  <Box pt={4} borderTop="1px" borderColor="gray.200">
+                    <Link to="/login"><Button variant="ghost" w="full" mb={3}>Sign in</Button></Link> 
+                    <Link to="/register"><Button colorScheme="purple" w="full">Get Started</Button></Link>
+                  </Box>
+                </VStack>
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
         </Flex>
       </Container>
     </Box>
@@ -77,15 +145,15 @@ const Header = ({ setActiveSection }) => {
 
 const Hero = ({ scrollToVideo }) => {
   return (
-    <Box bg="purple.50" py={20}>
+    <Box bg="purple.50" py={{ base: 12, md: 20 }}>
       <Container maxW="6xl">
         <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={12} alignItems="center">
           <Box>
-            <Heading size="2xl" mb={6} lineHeight="shorter">
+            <Heading size={{ base: "xl", md: "2xl" }} mb={6} lineHeight="shorter">
               Transform Learning with 
               <chakra.span color="purple.500"> AI-Powered</chakra.span> Education
             </Heading>
-            <Text fontSize="xl" color="gray.600" mb={8}>
+            <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" mb={8}>
               Upload any content and watch it transform into interactive learning materials. Enhance your 
               understanding with AI-generated flashcards, quizzes, mind maps, summaries, and chatbot assistance.
             </Text>
@@ -95,6 +163,7 @@ const Hero = ({ scrollToVideo }) => {
                   size="lg" 
                   colorScheme="purple" 
                   rightIcon={<ArrowRight />}
+                  w={{ base: "full", sm: "auto" }}
                 >
                   Start Learning Free
                 </Button>
@@ -104,12 +173,13 @@ const Hero = ({ scrollToVideo }) => {
                 variant="outline"
                 onClick={scrollToVideo}
                 leftIcon={<Play size={16} />}
+                w={{ base: "full", sm: "auto" }}
               >
                 Watch Demo
               </Button>
             </Stack>
           </Box>
-          <Box>
+          <Box display={{ base: 'none', lg: 'block' }}>
             <Image 
               src={require("../assete/www.jpg")}
               alt="Learning Dashboard" 
@@ -159,15 +229,15 @@ const Features = () => {
   
 
   return (
-    <Box py={20} bg="gray.50" id="features">
+    <Box py={{ base: 12, md: 20 }} bg="gray.50" id="features">
       <Container maxW="6xl">
         <VStack spacing={12}>
           <Box textAlign="center">
             <Text color="purple.500" fontWeight="semibold" mb={3}>
               FEATURES
             </Text>
-            <Heading mb={4}>Unlock the Power of AI Learning</Heading>
-            <Text color="gray.600" fontSize="lg" maxW="2xl">
+            <Heading mb={4} fontSize={{ base: "2xl", md: "4xl" }}>Unlock the Power of AI Learning</Heading>
+            <Text color="gray.600" fontSize={{ base: "md", md: "lg" }} maxW="2xl">
               Our AI-driven platform transforms any content into an engaging and interactive learning experience.
             </Text>
           </Box>
@@ -216,9 +286,9 @@ const Features = () => {
 
 // New Video Demo Component
 const DemoVideo = ({ videoRef }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true); // Starts as playing since autoplay
   const playerRef = useRef(null);
-  
+
   const handlePlayPause = () => {
     if (playerRef.current) {
       if (isPlaying) {
@@ -229,105 +299,104 @@ const DemoVideo = ({ videoRef }) => {
       setIsPlaying(!isPlaying);
     }
   };
-  
+
   return (
-    <Box py={20} bg="white" id="demo-video" ref={videoRef}>
+    <Box py={{ base: 12, md: 20 }} bg="white" id="demo-video" ref={videoRef}>
       <Container maxW="6xl">
-        <VStack spacing={12}>
+        <VStack spacing={16}>
+          {/* Header Section */}
           <Box textAlign="center">
-            <Text color="purple.500" fontWeight="semibold" mb={3}>
+            <Text color="purple.500" fontWeight="bold" mb={2} fontSize="sm" letterSpacing="wide">
               SEE IT IN ACTION
             </Text>
-            <Heading mb={4}>Experience StudyVia</Heading>
-            <Text color="gray.600" fontSize="lg" maxW="2xl" mb={10}>
+            <Heading fontSize={{ base: "3xl", md: "5xl" }} mb={4}>
+              Experience StudyVia
+            </Heading>
+            <Text color="gray.600" fontSize={{ base: "md", md: "lg" }} maxW="2xl" mx="auto">
               Watch how our platform transforms learning content into interactive materials 
               that enhance comprehension and retention.
             </Text>
           </Box>
-          
-          <Box 
-            borderRadius="xl" 
-            overflow="hidden" 
-            boxShadow="2xl" 
-            bg="gray.900"
+
+          {/* Video Card */}
+          <Box
             w="full"
             maxW="5xl"
             mx="auto"
-            transform="perspective(1000px) rotateX(5deg)"
-            _hover={{
-              transform: "perspective(1000px) rotateX(0deg)",
-              transition: "all 0.3s ease-in-out",
-            }}
-            transition="all 0.3s ease-in-out"
+            borderRadius="2xl"
+            overflow="hidden"
+            boxShadow="dark-lg"
+            bg="gray.900"
+            transform={{ base: "none", md: "perspective(1200px) rotateX(5deg)" }}
+            transition="transform 0.4s ease"
+            _hover={{ transform: "perspective(1200px) rotateX(0deg)" }}
           >
-            <Box p={6} borderBottom="1px" borderColor="gray.700">
-              <Flex justify="space-between" align="center">
-                <HStack>
-                  <Icon as={Brain} color="purple.400" boxSize={6} />
-                  <Text color="white" fontWeight="bold" fontSize="lg">StudyVia Demo</Text>
-                </HStack>
-                <Badge colorScheme="purple" variant="solid" fontSize="sm" px={3} py={1} borderRadius="full">
-                  AI-Powered Learning
-                </Badge>
-              </Flex>
-            </Box>
-            
+            {/* Header Bar */}
+            <Flex
+              px={6}
+              py={4}
+              justify="space-between"
+              align="center"
+              bg="gray.800"
+              borderBottom="1px"
+              borderColor="gray.700"
+            >
+              <HStack spacing={3}>
+                <Icon as={Brain} color="purple.400" boxSize={6} />
+                <Text color="white" fontWeight="semibold" fontSize="lg">StudyVia Demo</Text>
+              </HStack>
+              <Badge colorScheme="purple" borderRadius="full" px={3} py={1} fontSize="xs">
+                AI-Powered Learning
+              </Badge>
+            </Flex>
+
+            {/* Video Player */}
             <Box position="relative">
-              <AspectRatio ratio={16/9}>
+              <AspectRatio ratio={16 / 9}>
                 <video
                   ref={playerRef}
                   src={require("../assete/pfee.mp4")}
                   poster="/api/placeholder/1280/720"
+                  controls
+                  playsInline
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
+                  style={{ width: "100%", height: "100%" }}
                 />
               </AspectRatio>
+
+              {/* Controls */}
               
-              <Flex
-                position="absolute"
-                bottom={0}
-                left={0}
-                right={0}
-                bg="blackAlpha.700"
-                p={4}
-                backdropFilter="blur(10px)"
-                justify="space-between"
-                align="center"
-              >
-                <Button
-                  variant="solid"
-                  bg="purple.500"
-                  color="white"
-                  onClick={handlePlayPause}
-                  leftIcon={isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                  size="md"
-                  _hover={{ bg: "purple.600" }}
-                  borderRadius="full"
-                  px={6}
-                >
-                  {isPlaying ? 'Pause' : 'Play Demo'}
-                </Button>
-                <Text color="white" fontSize="md" fontWeight="medium">
-                  See how StudyVia transforms your learning experience
+            </Box>
+          
+            {/* Footer */}
+            <Flex
+              px={6}
+              py={4}
+              justify="space-between"
+              align="center"
+              bg="gray.800"
+              borderTop="1px"
+              borderColor="gray.700"
+            >
+              <Text color="gray.300" fontSize="sm">
+                Interactive learning demonstration
+              </Text>
+              <HStack spacing={2}>
+                <Icon as={CheckCircle2} color="green.400" boxSize={5} />
+                <Text color="green.400" fontSize="sm" fontWeight="medium">
+                  AI-Powered
                 </Text>
-              </Flex>
-            </Box>
-            
-            <Box p={6} bg="gray.800">
-              <Flex justify="space-between" align="center">
-                <Text color="gray.300" fontSize="sm">Interactive learning demonstration</Text>
-                <HStack>
-                  <Icon as={CheckCircle2} color="green.400" size={16} />
-                  <Text color="green.400" fontSize="sm" fontWeight="medium">AI-Powered</Text>
-                </HStack>
-              </Flex>
-            </Box>
+              </HStack>
+            </Flex>
           </Box>
         </VStack>
       </Container>
     </Box>
   );
 };
+
+
 
 const About = () => {
   const team = [
@@ -349,15 +418,15 @@ const About = () => {
   ];
 
   return (
-    <Box py={20} bg="white" id="about">
+    <Box py={{ base: 12, md: 20 }} bg="white" id="about">
       <Container maxW="6xl">
         <VStack spacing={16}>
           <VStack spacing={8} textAlign="center">
             <Text color="purple.500" fontWeight="semibold">
               ABOUT US
             </Text>
-            <Heading>Our Mission</Heading>
-            <Text color="gray.600" fontSize="lg" maxW="3xl">
+            <Heading fontSize={{ base: "2xl", md: "4xl" }}>Our Mission</Heading>
+            <Text color="gray.600" fontSize={{ base: "md", md: "lg" }} maxW="3xl">
               At StudyVia, we believe that education should be accessible, engaging, and effective for everyone. 
               Our mission is to transform the way people learn by harnessing the power of artificial intelligence 
               to create personalized learning experiences that adapt to individual needs and preferences.
@@ -389,8 +458,8 @@ const About = () => {
           </SimpleGrid>
 
           <VStack spacing={8} w="full">
-            <Heading>Leadership Team</Heading>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} w="full">
+            <Heading fontSize={{ base: "2xl", md: "4xl" }}>Leadership Team</Heading>
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={8} w="full">
               {team.map((member, index) => (
                 <VStack
                   key={index}
@@ -455,15 +524,15 @@ const Testimonials = () => {
   ];
 
   return (
-    <Box py={20} bg="gray.50">
+    <Box py={{ base: 12, md: 20 }} bg="gray.50">
       <Container maxW="6xl">
         <VStack spacing={12}>
           <Box textAlign="center">
             <Text color="purple.500" fontWeight="semibold" mb={3}>
               TESTIMONIALS
             </Text>
-            <Heading mb={4}>Loved by Students and Teachers</Heading>
-            <Text color="gray.600" fontSize="lg" maxW="2xl">
+            <Heading mb={4} fontSize={{ base: "2xl", md: "4xl" }}>Loved by Students and Teachers</Heading>
+            <Text color="gray.600" fontSize={{ base: "md", md: "lg" }} maxW="2xl">
               Join the learners who have transformed their education with StudyVia.
             </Text>
           </Box>
@@ -503,7 +572,7 @@ const Testimonials = () => {
 
 const CTA = () => {
   return (
-    <Box bg="purple.50" py={20}>
+    <Box bg="purple.50" py={{ base: 12, md: 20 }}>
       <Container maxW="6xl">
         <Stack
           direction={{ base: 'column', md: 'row' }}
@@ -512,22 +581,28 @@ const CTA = () => {
           justify="space-between"
         >
           <Box maxW="2xl">
-            <Heading mb={4}>Ready to Transform Your Learning?</Heading>
-            <Text fontSize="lg" color="gray.600">
+            <Heading mb={4} fontSize={{ base: "2xl", md: "4xl" }}>Ready to Transform Your Learning?</Heading>
+            <Text fontSize={{ base: "md", md: "lg" }} color="gray.600">
               Join StudyVia to transform your learning into the best experience. Contact Sales
             </Text>
           </Box>
-          <Stack direction={{ base: 'column', sm: 'row' }} spacing={4}>
+          <Stack direction={{ base: 'column', sm: 'row' }} spacing={4} w={{ base: "full", md: "auto" }}>
             <Link to="/register">
               <Button 
                 size="lg" 
                 colorScheme="purple" 
                 rightIcon={<ArrowRight />}
+                w={{ base: "full", sm: "auto" }}
               >
                 Get Learning Free
               </Button>
             </Link>
-            <Button size="lg" variant="outline" colorScheme="purple">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              colorScheme="purple"
+              w={{ base: "full", sm: "auto" }}
+            >
               Contact the team
             </Button>
           </Stack>
@@ -539,7 +614,7 @@ const CTA = () => {
 
 const Footer = () => {
   return (
-    <Box bg="white" py={16}>
+    <Box bg="white" py={{ base: 12, md: 16 }}>
       <Container maxW="6xl">
         <SimpleGrid columns={{ base: 1, md: 4 }} spacing={8} mb={8}>
           {/* Footer content (commented out in original) */}

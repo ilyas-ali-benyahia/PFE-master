@@ -18,9 +18,17 @@ import {
   Progress,
   Flex,
   useToast,
+  Stack,
+  Container,
+  Center,
+  VStack,
+  Image,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react';
-import { FaFileUpload, FaYoutube, FaLink, FaRegFileAlt } from 'react-icons/fa';
-import { MdOutlineDragIndicator } from 'react-icons/md';
+import { FaFileUpload, FaYoutube, FaLink, FaRegFileAlt, FaFilePdf, FaFileWord, FaFilePowerpoint, FaFileAlt, FaFileImage } from 'react-icons/fa';
+import { MdOutlineDragIndicator, MdCloudUpload } from 'react-icons/md';
+
 import { useApp } from '../context/AppContext';
 import * as api from '../services/api';
 
@@ -55,7 +63,6 @@ const UploadSection = () => {
         console.error('Error:', error);
         toast({
           title: 'Error',
-          // description: 'Failed to process your file. Please try again.',
           description: error.message,
           status: 'error',
           duration: 3000,
@@ -111,107 +118,302 @@ const UploadSection = () => {
     }
   }, [youtubeUrl, setIsProcessing, setGeneratedText, setShowStudyOptions, toast]);
 
-  
-
   return (
-    <Box w="100%" borderRadius="2xl" p={8} mb={8} bg="white" boxShadow="lg">
-      <Box justifyItems={'center'}>
-      <Heading size="2xl" mb={6} lineHeight="shorter">
-        Welcome  <chakra.span color="purple.500"> {state.username}</chakra.span>
-      </Heading>
-      <Text fontSize="xl" color="gray.700" mb={8}>
-        Start learning effortlessly—upload your content and choose a study tool.
-      </Text>
+    <Box 
+      w="100%" 
+      borderRadius={{ base: "lg", md: "xl", lg: "2xl" }} 
+      p={{ base: 4, md: 6, lg: 8 }} 
+      mb={{ base: 4, md: 6, lg: 8 }} 
+      
+
+    >
+      <Box textAlign={{ base: "center", md: "left" }}>
+        <Heading 
+          size={{ base: "xl", md: "xl", lg: "xl" }} 
+          mb={{ base: 3, md: 4, lg: 6 }} 
+          lineHeight="shorter"
+          textAlign={"center"}
+        >
+          Welcome <chakra.span color="purple.500"> {state.username}</chakra.span>
+        </Heading>
+        <Text 
+          fontSize={{ base: "md", md: "lg", lg: "xl" }} 
+          color="gray.700" 
+          mb={{ base: 4, md: 6, lg: 8 }}
+          textAlign={"center"}
+        >
+          Start learning effortlessly—upload your content and choose a study tool.
+        </Text>
       </Box>
-      <Tabs isFitted variant="soft-rounded" colorScheme="purple" onChange={setActiveTab} index={activeTab}>
-        <TabList bg="gray.100" p={2} borderRadius="lg">
-          <Tab _selected={{ bg: 'purple.500', color: 'white' }} fontWeight="medium">
+      
+      <Tabs 
+        isFitted 
+        variant="soft-rounded" 
+        colorScheme="purple" 
+        onChange={setActiveTab} 
+        index={activeTab}
+      >
+        <TabList 
+          bg="gray.100" 
+          p={{ base: 1, md: 2 }} 
+          borderRadius="lg" 
+          flexDirection={{ base: "column", sm: "row" }}
+        >
+          <Tab 
+            _selected={{ bg: 'purple.500', color: 'white' }} 
+            fontWeight="medium"
+            py={{ base: 2, md: 2 }}
+            fontSize={{ base: "sm", md: "md" }}
+          >
             <Icon as={FaFileUpload} mr={2} />
-            Upload File
+            <Text display={{ base: "none", sm: "inline" }}>Upload File</Text>
+            <Text display={{ base: "inline", sm: "none" }}>File</Text>
           </Tab>
-          <Tab _selected={{ bg: 'purple.500', color: 'white' }} fontWeight="medium">
+          <Tab 
+            _selected={{ bg: 'purple.500', color: 'white' }} 
+            fontWeight="medium"
+            py={{ base: 2, md: 2 }}
+            fontSize={{ base: "sm", md: "md" }}
+          >
             <Icon as={FaYoutube} mr={2} />
-            YouTube URL
+            <Text display={{ base: "none", sm: "inline" }}>YouTube URL</Text>
+            <Text display={{ base: "inline", sm: "none" }}>YouTube</Text>
           </Tab>
         </TabList>
+        
         <TabPanels>
-          <TabPanel p={4}>
-            <Box
-              borderWidth="2px"
-              borderStyle="dashed"
-              borderColor="purple.200"
-              borderRadius="lg"
-              p={8}
-              textAlign="center"
-              cursor="pointer"
-              transition="all 0.3s ease"
-              _hover={{ bg: 'purple.100', borderColor: 'purple.500' }}
-              onClick={() => fileInputRef.current.click()}
-            >
-              <Icon as={MdOutlineDragIndicator} boxSize={10} color="purple.500" />
-              <Text mt={4} color="purple.500" fontWeight="medium" fontSize="lg">
-                 Click to Upload 
-              </Text>
-              <Text mt={2} color="gray.600" fontSize="sm">
-                Supported formats: PDF, DOCX, PPTX, TXT, JPG, PNG
-              </Text>
-              <Input
-                type="file"
-                accept=".pdf,.pptx,.docx,.txt,.jpg,.jpeg,.png"
-                hidden
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-            </Box>
-            {file && (
-              <Flex w="full" bg="green.50" p={3} borderRadius="md" align="center" mt={4}>
-                <Icon as={FaRegFileAlt} color="green.500" mr={2} />
-                <Text color="green.700" fontWeight="medium" isTruncated>
-                  {file.name}
-                </Text>
-              </Flex>
-            )}
+          <TabPanel p={{ base: 2, md: 4 }}>
+          <Box
+                  borderWidth="2px"
+                  borderStyle="dashed"
+                  borderColor="purple.200"
+                  borderRadius={{ base: "lg", md: "xl" }}
+                  p={{ base: 4, sm: 6, md: 8 }}
+                  textAlign="center"
+                  cursor="pointer"
+                  transition="all 0.3s ease"
+                  _hover={{ 
+                    bg: 'purple.50', 
+                    borderColor: 'purple.500', 
+                    transform: 'scale(1.01)',
+                    boxShadow: 'md'
+                  }}
+                  onClick={() => fileInputRef.current.click()}
+                  bg="gray.50"
+                  position="relative"
+                  overflow="hidden"
+                >
+                  <Flex 
+                    direction="column" 
+                    align="center" 
+                    justify="center"
+                    position="relative"
+                    zIndex="2"
+                  >
+                    <Icon 
+                      as={MdCloudUpload} 
+                      boxSize={{ base: 10, sm: 12, md: 16 }} 
+                      color="purple.500" 
+                      mb={{ base: 3, md: 4 }}
+                    />
+                    <Text 
+                      color="purple.600" 
+                      fontWeight="bold" 
+                      fontSize={{ base: "lg", sm: "xl", md: "2xl" }}
+                      mb={{ base: 2, md: 3 }}
+                    >
+                      Click to Upload 
+                    </Text>
+                    <Text 
+                      color="gray.700" 
+                      fontSize={{ base: "xs", sm: "sm", md: "md" }}
+                      mb={{ base: 3, md: 4 }}
+                    >
+                      Drag & drop files or click to browse
+                    </Text>
+                    
+                    <Grid 
+                      templateColumns={{ base: "repeat(3, 1fr)", md: "repeat(5, 1fr)" }}
+                      gap={{ base: 2, md: 3 }}
+                      mt={{ base: 2, md: 4 }}
+                      w="full"
+                      maxW="md"
+                      justifyItems="center"
+                    >
+                      <GridItem>
+                        <VStack spacing={1}>
+                          <Icon as={FaFilePdf} color="red.500" boxSize={{ base: 5, md: 6 }} />
+                          <Text fontSize="xs" color="gray.600">PDF</Text>
+                        </VStack>
+                      </GridItem>
+                      <GridItem>
+                        <VStack spacing={1}>
+                          <Icon as={FaFileWord} color="blue.500" boxSize={{ base: 5, md: 6 }} />
+                          <Text fontSize="xs" color="gray.600">DOCX</Text>
+                        </VStack>
+                      </GridItem>
+                      <GridItem>
+                        <VStack spacing={1}>
+                          <Icon as={FaFilePowerpoint} color="orange.500" boxSize={{ base: 5, md: 6 }} />
+                          <Text fontSize="xs" color="gray.600">PPTX</Text>
+                        </VStack>
+                      </GridItem>
+                      <GridItem display={{ base: "none", md: "block" }}>
+                        <VStack spacing={1}>
+                          <Icon as={FaFileAlt} color="gray.500" boxSize={{ base: 5, md: 6 }} />
+                          <Text fontSize="xs" color="gray.600">TXT</Text>
+                        </VStack>
+                      </GridItem>
+                      <GridItem display={{ base: "none", md: "block" }}>
+                        <VStack spacing={1}>
+                          <Icon as={FaFileImage} color="green.500" boxSize={{ base: 5, md: 6 }} />
+                          <Text fontSize="xs" color="gray.600">JPG/PNG</Text>
+                        </VStack>
+                      </GridItem>
+                    </Grid>
+                  </Flex>
+                  
+                  {/* Background decorative elements */}
+                  <Box 
+                    position="absolute"
+                    top="10%"
+                    left="5%"
+                    width="40px"
+                    height="40px"
+                    borderRadius="full"
+                    bg="purple.100"
+                    opacity="0.3"
+                    zIndex="1"
+                  />
+                  <Box 
+                    position="absolute"
+                    bottom="15%"
+                    right="10%"
+                    width="60px"
+                    height="60px"
+                    borderRadius="full"
+                    bg="purple.100"
+                    opacity="0.4"
+                    zIndex="1"
+                  />
+                  <Box 
+                    position="absolute"
+                    top="40%"
+                    right="5%"
+                    width="30px"
+                    height="30px"
+                    borderRadius="full"
+                    bg="purple.200"
+                    opacity="0.3"
+                    zIndex="1"
+                  />
+                  <Box 
+                    position="absolute"
+                    bottom="5%"
+                    left="15%"
+                    width="25px"
+                    height="25px"
+                    borderRadius="full"
+                    bg="purple.200"
+                    opacity="0.3"
+                    zIndex="1"
+                  />
+                  
+                  <Input
+                    type="file"
+                    accept=".pdf,.pptx,.docx,.txt,.jpg,.jpeg,.png"
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                </Box>
+                {file && (
+                  <Flex 
+                    w="full" 
+                    bg="green.50" 
+                    p={{ base: 3, md: 4 }}
+                    borderRadius="md" 
+                    align="center" 
+                    mt={{ base: 3, md: 4 }}
+                    borderLeft="4px solid"
+                    borderColor="green.500"
+                    boxShadow="sm"
+                    role="group"
+                  >
+                    <Icon as={FaRegFileAlt} color="green.500" boxSize={{ base: 5, md: 6 }} mr={{ base: 3, md: 4 }} />
+                    <Box flex="1">
+                      <Text 
+                        color="green.700" 
+                        fontWeight="bold" 
+                        fontSize={{ base: "sm", md: "md" }}
+                        isTruncated
+                      >
+                        {file.name}
+                      </Text>
+                      <Text
+                        color="green.600"
+                        fontSize="xs"
+                        display={{ base: "none", sm: "block" }}
+                      >
+                        {(file.size / 1024 / 1024).toFixed(2)} MB • Ready to process
+                      </Text>
+                    </Box>
+                    
+                  </Flex>
+                )}
           </TabPanel>
-          <TabPanel p={4}>
-            <InputGroup size="lg">
-              <InputLeftElement pointerEvents="none">
-                <Icon as={FaLink} color="gray.400" />
-              </InputLeftElement>
-              <Input
-                value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
-                placeholder="Enter YouTube URL"
-                pr="4.5rem"
-                borderColor="gray.300"
-                _focus={{ borderColor: 'purple.500' }}
-              />
+          
+          <TabPanel p={{ base: 2, md: 4 }}>
+            <Stack spacing={4}>
+              <InputGroup size={{ base: "md", md: "lg" }}>
+                <InputLeftElement pointerEvents="none">
+                  <Icon as={FaLink} color="gray.400" />
+                </InputLeftElement>
+                <Input
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  placeholder="Enter YouTube URL"
+                  pr="4.5rem"
+                  borderColor="gray.300"
+                  _focus={{ borderColor: 'purple.500' }}
+                />
+              </InputGroup>
               <Button
                 colorScheme="red"
-                position="absolute"
-                right={0}
+                w={{ base: "full", md: "auto" }}
+                alignSelf={{ base: "stretch", md: "flex-end" }}
                 onClick={handleYoutubeSubmit}
-                zIndex={2}
               >
                 <Icon as={FaYoutube} mr={2} />
-                Go
+                Process Video
               </Button>
-            </InputGroup>
+            </Stack>
           </TabPanel>
         </TabPanels>
       </Tabs>
 
       {isProcessing && (
-        <Box mt={6} w={{ base: "100%", md: "80%", lg: "70%" }} mx="auto">
-          <Text mb={2} color="gray.600">Processing your content...</Text>
+        <Box 
+          mt={{ base: 4, md: 6 }} 
+          w={{ base: "100%", md: "80%", lg: "70%" }} 
+          mx="auto"
+        >
+          <Text 
+            mb={2} 
+            color="gray.600"
+            fontSize={{ base: "sm", md: "md" }}
+          >
+            Processing your content...
+          </Text>
           <Progress
-                  value={progressValue}
-                  height="12px"
-                  colorScheme="purple"
-                  borderRadius="full"
-                  mb={4}
-                  hasStripe
-                  isAnimated
-                />
+            value={progressValue}
+            height={{ base: "8px", md: "12px" }}
+            colorScheme="purple"
+            borderRadius="full"
+            mb={4}
+            hasStripe
+            isAnimated
+          />
         </Box>
       )}
     </Box>

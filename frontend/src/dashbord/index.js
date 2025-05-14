@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppProvider } from '../context/AppContext';
 import UploadSection from '../components/UploadSection';
@@ -11,68 +10,136 @@ import {
   Flex,
   Heading,
   Icon,
-  List,
-  ListItem,
   Text,
   useColorModeValue,
   VStack,
   HStack,
-  useDisclosure,
-  Collapse,
-  IconButton,
-  Divider,
-  Tooltip,
-  Badge,
   SimpleGrid,
-  Image
+  Image,
+  Link as ChakraLink,
+  IconButton,
+  useDisclosure,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton
 } from '@chakra-ui/react';
 import { 
   Brain,
   FileText,
-  ChevronDown,
-  ChevronUp,
-  History,
-  X,
-  File,
-  FileImage,
-  FileVideo,
-  FileAudio,
-  FileArchive,
   Layout,
   MessageSquare,
+  MessageCircle,
   Share2,
-  ClipboardList
+  ClipboardList,
+  Menu
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Header = ({ setActiveSection }) => {
+  // Add mobile menu functionality
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <Box bg="white" py={4} borderBottom="1px" borderColor="gray.100">
       <Container maxW="6xl">
         <Flex justify="space-between" align="center">
           <HStack spacing={2}>
-            <Icon as={Brain} color="purple.500" boxSize={8} />
+             <Image 
+                          src={require('../assete/logo.png')} 
+                          boxSize={8} 
+                        />
             <Text fontSize="2xl" fontWeight="bold" color="purple.500">
               StudyVia
             </Text>
           </HStack>
+          
+          {/* Desktop navigation - only displayed on md screens and up */}
           <HStack spacing={8} display={{ base: 'none', md: 'flex' }}>
-          <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
-            <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>            
-            {/* <Button variant="ghost" onClick={() => setActiveSection('resources')}>Resources</Button> */}
+            <Button variant="ghost" onClick={() => setActiveSection('pricing')}>Home</Button>
+            <Button variant="ghost" onClick={() => setActiveSection('features')}>Features</Button>           
             <Button variant="ghost" onClick={() => setActiveSection('about')}>About</Button>
+            <ChakraLink href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?usp=sharing" isExternal>
+              <Button leftIcon={<Icon as={MessageCircle} />} colorScheme="teal" variant="outline">
+                Feedback
+              </Button>
+            </ChakraLink>
           </HStack>
-          <HStack spacing={4}>
-            
+          
+          {/* Desktop CTA buttons */}
+          <HStack spacing={4} display={{ base: 'none', md: 'flex' }}>
             <Link to="/"><Button colorScheme="purple">Logout</Button></Link>
           </HStack>
+          
+          {/* Mobile menu button */}
+          <IconButton
+            aria-label="Open menu"
+            icon={<Icon as={Menu} />}
+            variant="ghost"
+            display={{ base: 'flex', md: 'none' }}
+            onClick={onOpen}
+          />
+
+          {/* Mobile drawer menu */}
+          <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+            <DrawerOverlay />
+            <DrawerContent>
+              <DrawerCloseButton />
+              <DrawerHeader>Menu</DrawerHeader>
+              <DrawerBody>
+                <VStack spacing={4} align="stretch">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('pricing');
+                      onClose();
+                    }}>
+                    Home
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('features');
+                      onClose();
+                    }}>
+                    Features
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setActiveSection('about');
+                      onClose();
+                    }}>
+                    About
+                  </Button>
+                  <ChakraLink 
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?usp=sharing" 
+                    isExternal
+                    w="100%"
+                  >
+                    <Button 
+                      leftIcon={<Icon as={MessageCircle} />} 
+                      colorScheme="teal" 
+                      variant="outline"
+                      w="100%"
+                    >
+                      Feedback
+                    </Button>
+                  </ChakraLink>
+                  <Link to="/" style={{ width: '100%' }}>
+                    <Button colorScheme="purple" w="100%">Logout</Button>
+                  </Link>
+                </VStack>
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
         </Flex>
       </Container>
     </Box>
   );
 };
-
-
 
 const Features = () => {
   const features = [
@@ -108,7 +175,6 @@ const Features = () => {
     }
   ];
   
-
   return (
     <Box py={20} bg="gray.50" id="features">
       <Container maxW="6xl">
@@ -165,7 +231,6 @@ const Features = () => {
   );
 };
 
-
 const About = () => {
   const team = [
     {
@@ -206,7 +271,7 @@ const About = () => {
               <Heading size="lg" mb={6}>Our Story</Heading>
               <Text color="gray.600" mb={4}>
                 our platform  was founded  by master's students and a research supervisor  who recognized the immense potential of artificial intelligence
-                in education.Driven by apassion for innovation, they set out to createa smarter, more efficient learning experience powered by AI
+                in education. Driven by a passion for innovation, they set out to create a smarter, more efficient learning experience powered by AI
               </Text>
               <Text color="gray.600" mb={4}>
                 After months of research and development, we created a platform that can transform any content into 
@@ -279,14 +344,36 @@ const Footer = () => {
         <Flex
           direction={{ base: 'column', md: 'row' }}
           justify="space-between"
-          align="center"
+          align={{ base: 'center', md: 'flex-start' }}
           borderTopWidth={1}
           borderColor="gray.200"
           pt={8}
         >
-          <Text color="gray.600">
-            © {new Date().getFullYear()} StudyVia. All rights reserved.
-          </Text>
+          <VStack align={{ base: 'center', md: 'flex-start' }} spacing={4}>
+            <HStack spacing={2}>
+            <Image 
+                          src={require('../assete/logo.png')} 
+                          boxSize={10}
+                        />
+              <Text fontSize="xl" fontWeight="bold" color="purple.500">
+                StudyVia
+              </Text>
+            </HStack>
+            <Text color="gray.600">
+              © {new Date().getFullYear()} StudyVia. All rights reserved.
+            </Text>
+            <ChakraLink 
+            // https://docs.google.com/forms/d/1ujVnRl-aSCFXsxrk2yFIWHsrKaR4BpLx2W7ohcJ0SSY/edit
+              href="https://docs.google.com/forms/d/e/1FAIpQLSfoKScbGuUK53iGPOojANyrVXizVkF2iZglM85sjCxJ4LltsA/viewform?usp=sharing" 
+              isExternal
+              color="purple.500"
+              display="flex"
+              alignItems="center"
+            >
+              <Icon as={MessageCircle} mr={2} />
+              Share your feedback
+            </ChakraLink>
+          </VStack>
           <HStack spacing={4} mt={{ base: 4, md: 0 }}>
             <Button variant="ghost" size="sm">Twitter</Button>
             <Button variant="ghost" size="sm">LinkedIn</Button>
@@ -298,207 +385,11 @@ const Footer = () => {
   );
 };
 
-// Example files that won't persist in localStorage
-const exampleFiles = [
-  {
-    id: 'example1',
-    name: 'Biology-Chapter1.pdf',
-    type: 'pdf',
-    isExample: true,
-    content: 'This is an example PDF file about Biology Chapter 1'
-  },
-  {
-    id: 'example2',
-    name: 'Chemistry-Reactions.jpg',
-    type: 'image',
-    isExample: true,
-    content: 'This is an example image showing chemical reactions'
-  },
-  {
-    id: 'example3',
-    name: 'Physics-Lecture.mp4',
-    type: 'video',
-    isExample: true,
-    content: 'This is an example video lecture about Physics'
-  }
-];
-
-// Get files from localStorage or initialize with empty array
-const getStoredFiles = () => {
-  try {
-    const stored = localStorage.getItem('uploadedFiles');
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Error reading from localStorage:', error);
-    return [];
-  }
-};
-
-const FileIcon = ({ type }) => {
-  const icons = {
-    'image': FileImage,
-    'video': FileVideo,
-    'audio': FileAudio,
-    'pdf': FileText,
-    'zip': FileArchive,
-    'default': File
-  };
-  
-  const IconComponent = icons[type] || icons['default'];
-  return <Icon as={IconComponent} />;
-};
-
-const FileHistorySidebar = ({ files, onSelectFile, onRemoveFile, isOpen, onToggle }) => {
-  return (
-    <Box 
-      position="absolute" 
-      left="0" 
-      top="20"
-      bottom="52"
-      w={isOpen ? "300px" : "60px"}
-      bg="white"
-      boxShadow="lg"
-      transition="all 0.3s ease"
-      zIndex="sticky"
-    >
-      <Flex direction="column" h="100%" borderRight="1px" borderColor="gray.200">
-        <Flex 
-          p={4} 
-          align="center" 
-          justify={isOpen ? "space-between" : "center"}
-          borderBottom="1px" 
-          borderColor="gray.200"
-          cursor="pointer"
-          onClick={onToggle}
-        >
-          {isOpen ? (
-            <>
-              <HStack>
-                <Icon as={History} color="purple.500" />
-                <Text fontWeight="bold">File History</Text>
-              </HStack>
-              <Icon as={ChevronDown} />
-            </>
-          ) : (
-            <Tooltip label="Show History" placement="right">
-              <Icon as={History} color="purple.500" />
-            </Tooltip>
-          )}
-        </Flex>
-        
-        <Collapse in={isOpen} animateOpacity>
-          <Box flex="1" overflowY="auto" p={2}>
-            {/* Example Files Section */}
-            <Box mb={4}>
-              <Text fontSize="xs" color="gray.500" mb={2} px={2}>
-                EXAMPLE FILES
-              </Text>
-              <List spacing={2}>
-                {exampleFiles.map((file) => (
-                  <ListItem key={file.id}>
-                    <Flex
-                      align="center"
-                      p={2}
-                      borderRadius="md"
-                      _hover={{ bg: 'purple.50' }}
-                      cursor="pointer"
-                      onClick={() => onSelectFile(file)}
-                    >
-                      <Box color="purple.500" mr={3}>
-                        <FileIcon type={file.type} />
-                      </Box>
-                      <Text flex="1" isTruncated fontSize="sm">
-                        {file.name}
-                      </Text>
-                      <Badge colorScheme="purple" fontSize="xs">Example</Badge>
-                    </Flex>
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-
-            {/* User Files Section */}
-            <Divider my={2} />
-            <Box>
-              <Text fontSize="xs" color="gray.500" mb={2} px={2}>
-                YOUR FILES
-              </Text>
-              {files.length === 0 ? (
-                <Text fontSize="sm" color="gray.500" px={2} py={4}>
-                  No files uploaded yet
-                </Text>
-              ) : (
-                <List spacing={2}>
-                  {files.map((file, index) => (
-                    <ListItem key={index}>
-                      <Flex
-                        align="center"
-                        p={2}
-                        borderRadius="md"
-                        _hover={{ bg: 'purple.50' }}
-                        bg={file.isSelected ? 'purple.100' : 'transparent'}
-                        cursor="pointer"
-                        onClick={() => onSelectFile(file, index)}
-                      >
-                        <Box color="purple.500" mr={3}>
-                          <FileIcon type={file.type} />
-                        </Box>
-                        <Text 
-                          flex="1" 
-                          isTruncated 
-                          fontSize="sm"
-                          fontWeight={file.isSelected ? "bold" : "normal"}
-                        >
-                          {file.name}
-                        </Text>
-                        <IconButton
-                          icon={<X size={16} />}
-                          size="xs"
-                          variant="ghost"
-                          aria-label="Remove file"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRemoveFile(index);
-                          }}
-                        />
-                      </Flex>
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Box>
-          </Box>
-        </Collapse>
-        
-        {isOpen && (
-          <Box p={4} borderTop="1px" borderColor="gray.200">
-            <Text fontSize="xs" color="gray.500">
-              {files.length} {files.length === 1 ? 'file' : 'files'} stored
-            </Text>
-          </Box>
-        )}
-      </Flex>
-    </Box>
-  );
-};
-
 const App = () => {
   const bgColor = useColorModeValue('purple.50', 'gray.900');
   const [activeSection, setActiveSection] = useState('home');
-  const [uploadedFiles, setUploadedFiles] = useState(getStoredFiles());
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
-
-  // Save to localStorage whenever uploadedFiles changes
-  useEffect(() => {
-    try {
-      // Only save files that aren't examples
-      const filesToStore = uploadedFiles.filter(file => !file.isExample);
-      localStorage.setItem('uploadedFiles', JSON.stringify(filesToStore));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  }, [uploadedFiles]);
 
   const handleFileUpload = (file) => {
     const newFile = { 
@@ -513,35 +404,6 @@ const App = () => {
     setSelectedFile(newFile);
   };
 
-  const handleSelectFile = (file, index) => {
-    if (file.isExample) {
-      // Handle example file selection
-      setSelectedFile(file);
-    } else {
-      // Handle user file selection
-      setUploadedFiles(prev => 
-        prev.map((f, i) => ({ 
-          ...f, 
-          isSelected: i === index 
-        }))
-      );
-      setSelectedFile(file);
-    }
-  };
-
-  const handleRemoveFile = (index) => {
-    setUploadedFiles(prev => {
-      const newFiles = prev.filter((_, i) => i !== index);
-      if (prev[index].isSelected) {
-        setSelectedFile(newFiles[0] || null);
-        if (newFiles[0]) {
-          newFiles[0].isSelected = true;
-        }
-      }
-      return newFiles;
-    });
-  };
-
   const renderSection = () => {
     switch(activeSection) {
       case 'features':
@@ -552,29 +414,14 @@ const App = () => {
       default:
         return (
           <AppProvider>
-            <Box w="100vw" minH="100vh" bg={bgColor} color="gray.800">
-              <FileHistorySidebar 
-               
-                files={uploadedFiles} 
-                onSelectFile={handleSelectFile}
-                onRemoveFile={handleRemoveFile}
-                isOpen={isOpen}
-                onToggle={onToggle}
-              />
-               
-              <Box 
-                ml={isOpen ? "300px" : "60px"} 
-                transition="all 0.3s ease"
-                p={4}
-              >
-                <Flex flex={1} justifyContent="center" alignItems="center" py={8}>
-                  <Container maxW="container.xl">
-                    <UploadSection onFileUpload={handleFileUpload} />
-                    <StudyOptions selectedFile={selectedFile} />
-                    <ResultsSection selectedFile={selectedFile} />
-                  </Container>
-                </Flex>
-              </Box>
+            <Box w="100%" minH="100vh" bg={bgColor} color="gray.800">
+              <Flex flex={1} justifyContent="center" alignItems="center" py={8}>
+                <Container maxW="container.xl">
+                  <UploadSection onFileUpload={handleFileUpload} />
+                  <StudyOptions selectedFile={selectedFile} />
+                  <ResultsSection selectedFile={selectedFile} />
+                </Container>
+              </Flex>
             </Box>
           </AppProvider>
         );
@@ -583,7 +430,7 @@ const App = () => {
 
   return (
     <Box>
-       <Header  setActiveSection={setActiveSection} />
+      <Header setActiveSection={setActiveSection} />
       {renderSection()}
       <Footer />
     </Box>

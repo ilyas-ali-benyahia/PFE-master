@@ -22,7 +22,8 @@ import {
   Spinner,
   List,
   ListItem,
-  ListIcon
+  ListIcon,
+  useBreakpointValue
 } from '@chakra-ui/react';
 import { useApp } from '../context/AppContext';
 import { renderMermaidDiagram } from '../utils/mermaidUtils';
@@ -34,21 +35,28 @@ const Flashcard = ({ question, answer, isFlipped, onFlip }) => {
   const answerBgColor = useColorModeValue('green.50', 'green.700');
   const textColor = useColorModeValue('gray.800', 'white');
   
+  // Responsive height adjustments
+  const cardHeight = useBreakpointValue({ base: "200px", sm: "250px", md: "300px" });
+  const padding = useBreakpointValue({ base: 3, sm: 4, md: 6 });
+  const fontSize = useBreakpointValue({ base: "sm", sm: "md", md: "lg" });
+  const headingSize = useBreakpointValue({ base: "sm", md: "md" });
+  
   return (
     <Box
-      minHeight="300px"
+      minHeight={cardHeight}
       display="flex"
       alignItems="center"
       justifyContent="center"
-      my={4}
-      p={12}
+      
+      p={{ base: 2, sm: 4, md: 12 }}
+      width="100%"
     >
       <Box
         borderRadius="lg"
         boxShadow="xl"
-        p={6}
+        p={padding}
         width="100%"
-        height="300px"
+        height={cardHeight}
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -65,7 +73,7 @@ const Flashcard = ({ question, answer, isFlipped, onFlip }) => {
           height="100%"
           borderRadius="lg"
           boxShadow="lg"
-          p={6}
+          p={padding}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -88,12 +96,16 @@ const Flashcard = ({ question, answer, isFlipped, onFlip }) => {
             justifyContent="center"
             bg={questionBgColor}
             color={textColor}
-            p={6}
+            p={padding}
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <Heading size="md" mb={4}>Question</Heading>
-            <Text fontSize="lg" textAlign="center">{question}</Text>
-            <Badge position="absolute" bottom={4} right={4} colorScheme="blue">Click to flip</Badge>
+            <Heading size={headingSize} mb={3}>Question</Heading>
+            <Text fontSize={fontSize} textAlign="center" overflow="auto" px={2}>
+              {question}
+            </Text>
+            <Badge position="absolute" bottom={3} right={3} colorScheme="blue" fontSize="xs">
+              Click to flip
+            </Badge>
           </Box>
           
           {/* Answer side */}
@@ -108,15 +120,19 @@ const Flashcard = ({ question, answer, isFlipped, onFlip }) => {
             justifyContent="center"
             bg={answerBgColor}
             color={textColor}
-            p={6}
+            p={padding}
             style={{ 
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)'
             }}
           >
-            <Heading size="md" mb={4}>Answer</Heading>
-            <Text fontSize="lg" textAlign="center">{answer}</Text>
-            <Badge position="absolute" bottom={4} right={4} colorScheme="green">Click to flip</Badge>
+            <Heading size={headingSize} mb={3}>Answer</Heading>
+            <Text fontSize={fontSize} textAlign="center" overflow="auto" px={2}>
+              {answer}
+            </Text>
+            <Badge position="absolute" bottom={3} right={3} colorScheme="green" fontSize="xs">
+              Click to flip
+            </Badge>
           </Box>
         </Box>
       </Box>
@@ -136,6 +152,14 @@ const ResultsSection = ({ option }) => {
   const keyPointsBg = useColorModeValue('blue.50', 'blue.900');
   const summaryBg = useColorModeValue('green.50', 'green.900');
   const hoverBgColor = useColorModeValue('gray.100', 'gray.700');
+
+  // Responsive values
+  const containerPadding = useBreakpointValue({ base: 2, sm: 4, md: 6 });
+  const fontSize = useBreakpointValue({ base: "sm", md: "md" });
+  const headingSize = useBreakpointValue({ base: "xs", sm: "sm", md: "md" });
+  const buttonSize = useBreakpointValue({ base: "sm", md: "md", lg: "lg" });
+  const iconButtonSize = useBreakpointValue({ base: "md", md: "lg" });
+  const quizColumns = useBreakpointValue({ base: 1, md: 2 });
 
   // State management
   const [currentFlashcardIndex, setCurrentFlashcardIndex] = useState(0);
@@ -181,7 +205,7 @@ const ResultsSection = ({ option }) => {
 
       const renderDiagram = async () => {
         try {
-          const processedCode = processDiagramCode(result.diagram_code);
+          const processedCode = processDiagramCode(result.diagram_code, result.language);
           await renderMermaidDiagram(processedCode, diagramRef.current);
         } catch (error) {
           console.error("Diagram rendering error:", error);
@@ -255,10 +279,7 @@ const ResultsSection = ({ option }) => {
 
     return (
       <VStack spacing={4} width="100%" align="stretch">
-        <Flex justify="space-between" align="center">
-          <Text fontWeight="medium">Flashcard {currentFlashcardIndex + 1} of {result.flashcards.length}</Text>
-          <Button size="sm" colorScheme="blue" onClick={() => setShowAnswer(false)}>Reset</Button>
-        </Flex>
+        
         
         <Flashcard 
           question={currentFlashcard.question}
@@ -266,22 +287,27 @@ const ResultsSection = ({ option }) => {
           isFlipped={showAnswer}
           onFlip={flipFlashcard}
         />
+          <Box fontWeight="medium" fontSize={fontSize} justifyContent={"center"} textAlign="center">
+            Flashcard {currentFlashcardIndex + 1} of {result.flashcards.length}
+          </Box>
+        <HStack spacing={{ base: 2, md: 4 }} justify="center" >
         
-        <HStack spacing={4} justify="center" mt={2}>
+          
+          
           <IconButton 
             icon={<ChevronLeftIcon />} 
             aria-label="Previous flashcard" 
             onClick={goToPrevFlashcard}
             colorScheme="blue"
             variant="outline"
-            size="lg"
+            size={iconButtonSize}
           />
           <IconButton 
             icon={<RepeatIcon />} 
             aria-label="Flip card" 
             onClick={flipFlashcard}
             colorScheme="teal"
-            size="lg"
+            size={iconButtonSize}
           />
           <IconButton 
             icon={<ChevronRightIcon />} 
@@ -289,7 +315,7 @@ const ResultsSection = ({ option }) => {
             onClick={goToNextFlashcard}
             colorScheme="blue"
             variant="outline"
-            size="lg"
+            size={iconButtonSize}
           />
         </HStack>
       </VStack>
@@ -302,16 +328,21 @@ const ResultsSection = ({ option }) => {
     }
 
     return (
-      <VStack spacing={8} align="stretch" width="100%">
+      <VStack spacing={6} align="stretch" width="100%">
         {result.quizzes?.map((quiz, index) => (
           <Card key={index} borderWidth="1px" borderColor={borderColor} shadow="md">
-            <CardHeader bg="purple.50" borderBottomWidth="1px" borderColor={borderColor}>
-              <Heading size="sm" fontWeight="bold">Quiz Question {index + 1}</Heading>
+            <CardHeader 
+              bg="purple.50" 
+              borderBottomWidth="1px" 
+              borderColor={borderColor}
+              p={{ base: 3, md: 4 }}
+            >
+              <Heading size={headingSize} fontWeight="bold">Quiz Question {index + 1}</Heading>
             </CardHeader>
-            <CardBody>
-              <Text fontWeight="medium" mb={3}>{quiz.question}</Text>
+            <CardBody p={{ base: 3, md: 4 }}>
+              <Text fontWeight="medium" mb={3} fontSize={fontSize}>{quiz.question}</Text>
               <Divider my={2} />
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3} mt={3}>
+              <SimpleGrid columns={quizColumns} spacing={3} mt={3}>
                 {Object.entries(quiz.options).map(([key, value]) => {
                   const isSelected = quizAnswers[index] === key;
                   const showResult = showResults[index];
@@ -325,7 +356,7 @@ const ResultsSection = ({ option }) => {
                   return (
                     <Box 
                       key={key}
-                      p={3}
+                      p={{ base: 2, md: 3 }}
                       borderWidth="1px"
                       borderRadius="md"
                       borderColor={isSelected ? (showResult ? (isCorrect ? "green.500" : "red.500") : "blue.500") : borderColor}
@@ -335,10 +366,10 @@ const ResultsSection = ({ option }) => {
                       _hover={!showResults[index] ? { bg: hoverBgColor } : {}}
                       transition="all 0.2s"
                     >
-                      <Flex align="center" justify="space-between">
-                        <Text>{key}: {value}</Text>
+                      <Flex align="center" justify="space-between" flexWrap="wrap" gap={1}>
+                        <Text fontSize={{ base: "sm", md: "md" }}>{key}: {value}</Text>
                         {showResult && isSelected && (
-                          <Badge colorScheme={isCorrect ? "green" : "red"} ml={2}>
+                          <Badge colorScheme={isCorrect ? "green" : "red"} ml={{ base: 0, md: 2 }}>
                             {isCorrect ? "Correct" : "Incorrect"}
                           </Badge>
                         )}
@@ -356,7 +387,7 @@ const ResultsSection = ({ option }) => {
                       setShowResults(prev => ({ ...prev, [index]: false }));
                     }}
                     colorScheme="blue"
-                    size="sm"
+                    size={buttonSize}
                   >
                     Try Again
                   </Button>
@@ -372,9 +403,19 @@ const ResultsSection = ({ option }) => {
   const renderSummary = () => {
     return (
       <Card borderWidth="1px" shadow="md" width="100%" overflow="hidden">
-        <CardHeader bg={summaryBg} borderBottomWidth="1px" py={4}>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Heading size="md" color={headingColor}>
+        <CardHeader 
+          bg={summaryBg} 
+          borderBottomWidth="1px" 
+          py={{ base: 3, md: 4 }}
+          px={{ base: 3, md: 4 }}
+        >
+          <Flex 
+            justifyContent="space-between" 
+            alignItems="center"
+            flexDirection={{ base: "column", sm: "row" }}
+            gap={2}
+          >
+            <Heading size={headingSize} color={headingColor}>
               Document Summary
             </Heading>
             <Flex>
@@ -388,25 +429,29 @@ const ResultsSection = ({ option }) => {
         </CardHeader>
         <CardBody p={0}>
           <Box 
-            p={6}
+            p={{ base: 3, md: 6 }}
             className="markdown-summary" 
             dir={result.language === 'Arabic' ? 'rtl' : 'ltr'}
             style={{ textAlign: result.language === 'Arabic' ? 'right' : 'left' }}
           >
-            <Box mb={6} p={5} borderRadius="md" bg="white" boxShadow="sm">
-              <Text fontSize="lg" fontWeight="medium" lineHeight="tall">
+            <Box mb={6} p={{ base: 3, md: 5 }} borderRadius="md" bg="white" boxShadow="sm">
+              <Text 
+                fontSize={{ base: "md", md: "lg" }} 
+                fontWeight="medium" 
+                lineHeight="tall"
+              >
                 {result.summary || "No summary generated"}
               </Text>
             </Box>
             
-            <Box p={5} borderRadius="md" bg={keyPointsBg}>
-              <Heading size="md" mb={4} color={headingColor}>Key Points</Heading>
+            <Box p={{ base: 3, md: 5 }} borderRadius="md" bg={keyPointsBg}>
+              <Heading size={headingSize} mb={4} color={headingColor}>Key Points</Heading>
               {result.key_points && result.key_points.length > 0 ? (
                 <List spacing={3}>
                   {result.key_points.map((point, idx) => (
                     <ListItem key={idx} display="flex" alignItems="flex-start">
                       <ListIcon as={CheckCircleIcon} color="green.500" mt={1} />
-                      <Text fontWeight="medium">{point}</Text>
+                      <Text fontWeight="medium" fontSize={fontSize}>{point}</Text>
                     </ListItem>
                   ))}
                 </List>
@@ -419,24 +464,36 @@ const ResultsSection = ({ option }) => {
       </Card>
     );
   };
-
+  const renderChatbot = () => {
+    return <ChatSection />;
+  };
   const renderMindmap = () => {
     const isArabic = result.language === 'Arabic';
     const isFrench = result.language === 'French';
 
     return (
       <Card borderWidth="1px" borderColor={borderColor} shadow="md" width="100%">
-        <CardHeader bg="orange.50" borderBottomWidth="1px" borderColor={borderColor}>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Heading size="md">Mind Map</Heading>
+        <CardHeader 
+          bg="orange.50" 
+          borderBottomWidth="1px" 
+          borderColor={borderColor}
+          p={{ base: 3, md: 4 }}
+        >
+          <Flex 
+            justifyContent="space-between" 
+            alignItems="center"
+            flexDirection={{ base: "column", sm: "row" }}
+            gap={2}
+          >
+            <Heading size={headingSize}>Mind Map</Heading>
             {result.language && (
               <Badge colorScheme="blue">{result.language}</Badge>
             )}
           </Flex>
         </CardHeader>
-        <CardBody>
+        <CardBody p={{ base: 3, md: 4 }}>
           {isRenderingDiagram && (
-            <Center p={10}>
+            <Center p={{ base: 6, md: 10 }}>
               <VStack>
                 <Spinner size="xl" color="blue.500" thickness="4px" />
                 <Text mt={4}>Rendering diagram...</Text>
@@ -445,22 +502,25 @@ const ResultsSection = ({ option }) => {
           )}
           
           {diagramError && (
-            <Box p={4} borderWidth="1px" borderRadius="md" borderColor="red.300" bg="red.50">
+            <Box  borderWidth="1px" borderRadius="md" borderColor="red.300" bg="red.50">
               <Heading size="sm" color="red.600" mb={2}>Error Rendering Diagram</Heading>
-              <Text>{diagramError}</Text>
-              <Box mt={4} p={3} bg="gray.50" borderRadius="md">
-                
-                
-                  <pre >{result.diagram_code}</pre>
-               
+              <Text fontSize={fontSize}>{diagramError}</Text>
+              <Box 
+                mt={4} 
+                p={3} 
+                bg="gray.50" 
+                borderRadius="md"
+                overflow="auto"
+                maxHeight="300px"
+              >
+                <pre style={{ fontSize: "0.8rem" }}>{result.diagram_code}</pre>
               </Box>
             </Box>
           )}
           
           <Box 
             ref={diagramRef} 
-           
-                       
+            overflowX="auto"
             dir={isArabic ? 'rtl' : 'ltr'}
             style={{ 
               display: isRenderingDiagram ? 'none' : 'block',
@@ -489,26 +549,20 @@ const ResultsSection = ({ option }) => {
   };
 
   return (
-    <Container maxW="container.xl" >
+    <Container maxW="container.xl" px={{ base: 2, sm: 4, md: 6 }}>
       <Box 
-        
-        bg={bgColor} 
-        borderRadius="lg" 
-        w={"100%"}
-        borderColor={borderColor}
-        shadow="md"
-        overflow="hidden"
-        p={6}
+       w="100%" 
+       borderRadius={{ base: "lg", md: "xl", lg: "2xl" }} 
+       p={{ base: 4, md: 6, lg: 8 }} 
+       mb={{ base: 4, md: 6, lg: 8 }} 
       >
-        {option === 'Flashcards' && renderFlashcards()}
+        
         {option === 'Quizzes' && renderQuizzes()}
         {option === 'Summarize' && renderSummary()}
         {option === 'Mindmap' && renderMindmap()}
-        {option === 'Chatbot' && <ChatSection />}
-        
+        {option === 'Chatbot' && renderChatbot()}
+        {option === 'Flashcards' && renderFlashcards()}
       </Box>
-      
-
     </Container>
   );
 };

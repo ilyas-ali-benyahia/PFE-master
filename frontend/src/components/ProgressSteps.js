@@ -1,46 +1,3 @@
-// // components/ProgressSteps.js
-// import React from 'react';
-// import { Flex, HStack, Box, Text, Icon } from '@chakra-ui/react';
-// import { BsArrowRight } from 'react-icons/bs';
-// import { useApp } from '../context/AppContext';
-
-// const ProgressSteps = () => {
-//   const { state } = useApp();
-//   const { activeTab } = state;
-
-//   const steps = ['Upload', 'Choose Option', 'Get Results'];
-
-//   return (
-//     <Flex mb={6} justify="center">
-//       <HStack spacing={4}>
-//         {steps.map((step, index) => (
-//           <Flex key={step} align="center">
-//             <Box
-//               w={6}
-//               h={6}
-//               borderRadius="full"
-//               bg={index <= activeTab ? 'purple.500' : 'gray.200'}
-//               color={index <= activeTab ? 'white' : 'gray.600'}
-//               display="flex"
-//               alignItems="center"
-//               justifyContent="center"
-//               fontSize="sm"
-//               fontWeight="bold"
-//             >
-//               {index + 1}
-//             </Box>
-//             <Text ml={2} fontSize="sm" color={index <= activeTab ? 'gray.800' : 'gray.600'}>
-//               {step}
-//             </Text>
-//             {index < steps.length - 1 && <Icon as={BsArrowRight} ml={4} color="gray.600" />}
-//           </Flex>
-//         ))}
-//       </HStack>
-//     </Flex>
-//   );
-// };
-
-// export default React.memo(ProgressSteps);
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -48,12 +5,21 @@ import {
   Text,
   Progress,
   Spinner,
-  useInterval
+  useInterval,
+  Stack,
+  useBreakpointValue
 } from '@chakra-ui/react';
 
- const ProcessingIndicator = ({ isProcessing, onComplete }) => {
+const ProcessingIndicator = ({ isProcessing, onComplete }) => {
   const [progressValue, setProgressValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // Use responsive layout based on screen size
+  const direction = useBreakpointValue({ base: "column", md: "row" });
+  const stepsLayout = useBreakpointValue({ base: "column", sm: "row" });
+  const padding = useBreakpointValue({ base: 4, md: 6 });
+  const fontSize = useBreakpointValue({ base: "xs", md: "sm" });
+  const spacing = useBreakpointValue({ base: 2, md: 4 });
   
   const steps = [
     { id: 0, name: 'Uploading', range: [0, 25], message: 'Receiving your files...' },
@@ -93,13 +59,14 @@ import {
 
   return (
     <Box 
-      mt={8}
-      p={6}
+      mt={4}
+      p={padding}
       bg="white"
       borderRadius="xl"
       boxShadow="md"
       borderWidth="1px"
       borderColor="gray.100"
+      width="100%"
     >
       {/* Progress Bar */}
       <Progress
@@ -113,9 +80,21 @@ import {
       />
       
       {/* Step Indicators */}
-      <Flex justify="space-between" mb={6}>
+      <Flex 
+        justify="space-between" 
+        mb={6}
+        direction={stepsLayout}
+        wrap="wrap"
+        gap={spacing}
+      >
         {steps.map((step, index) => (
-          <Flex key={step.id} direction="column" align="center">
+          <Flex 
+            key={step.id} 
+            direction="column" 
+            align="center"
+            flex={stepsLayout === "row" ? 1 : "unset"}
+            mb={stepsLayout === "column" ? 3 : 0}
+          >
             <Box
               w={6}
               h={6}
@@ -132,9 +111,10 @@ import {
               {currentStep > index ? '✓' : index + 1}
             </Box>
             <Text 
-              fontSize="sm"
+              fontSize={fontSize}
               fontWeight={currentStep === index ? 'bold' : 'normal'}
               color={currentStep >= index ? 'purple.600' : 'gray.500'}
+              textAlign="center"
             >
               {step.name}
             </Text>
@@ -143,18 +123,34 @@ import {
       </Flex>
       
       {/* Current Status */}
-      <Flex align="center">
-        <Spinner 
-          size="sm" 
-          color="purple.500" 
-          mr={3}
-          thickness="3px"
-          speed="0.65s"
-        />
-        <Text fontSize="md" fontWeight="medium">
-          {steps[currentStep]?.message}
-        </Text>
-        <Text ml="auto" fontWeight="bold" color="purple.600">
+      <Flex 
+        align="center" 
+        direction={direction}
+        wrap="wrap"
+        gap={2}
+      >
+        <Flex align="center">
+          <Spinner 
+            size="sm" 
+            color="purple.500" 
+            mr={3}
+            thickness="3px"
+            speed="0.65s"
+          />
+          <Text 
+            fontSize={fontSize} 
+            fontWeight="medium"
+            noOfLines={1}
+          >
+            {steps[currentStep]?.message}
+          </Text>
+        </Flex>
+        <Text 
+          ml={direction === "row" ? "auto" : 0} 
+          fontWeight="bold" 
+          color="purple.600"
+          alignSelf={direction === "column" ? "flex-end" : "center"}
+        >
           {Math.round(progressValue)}%
         </Text>
       </Flex>
@@ -162,5 +158,4 @@ import {
   );
 };
 
-// Usage example:
-export default React.memo(ProcessingIndicator)
+export default React.memo(ProcessingIndicator);

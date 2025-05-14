@@ -14,8 +14,12 @@ export const useAppState = () => {
     dispatch({ type: 'SET_YOUTUBE_URL', payload: url });
   }, [dispatch]);
 
-  const setActiveTab = useCallback((tab) => {
-    dispatch({ type: 'SET_ACTIVE_TAB', payload: tab });
+  
+  const setstudyOptionsActiveTab = useCallback((tab) => {
+    dispatch({ type: 'SET_STUDY_OPTIONS_ACTIVE_TAB', payload: tab });
+  }, [dispatch]);
+  const setUploadSectionActiveTab = useCallback((tab) => {
+    dispatch({ type: 'SET_UPLOAD_SECTION_ACTIVE_TAB', payload: tab });
   }, [dispatch]);
 
   const setIsProcessing = useCallback((isProcessing) => {
@@ -55,7 +59,9 @@ export const useAppState = () => {
     actions: {
       setFile,
       setYoutubeUrl,
-      setActiveTab,
+      
+      setstudyOptionsActiveTab,
+      setUploadSectionActiveTab,
       setIsProcessing,
       setProgressValue,
       setGeneratedText,
