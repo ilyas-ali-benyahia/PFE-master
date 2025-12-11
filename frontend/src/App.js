@@ -6,10 +6,10 @@ import TransformLearningApp from "./dashbord/index";
 
 
 // Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("userInfo"); // Check if user is logged in
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+// const ProtectedRoute = ({ children }) => {
+//   const isAuthenticated = localStorage.getItem("userInfo"); // Check if user is logged in
+//   return isAuthenticated ? children : <Navigate to="/login" replace />;
+// };
 
 function App() {
   return (
